@@ -1,0 +1,25 @@
+{
+  "name": "@ningacademy/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx watch src/index.ts",
+    "lint": "eslint src --max-warnings 0",
+    "start": "node dist/index.js",
+    "test": "vitest run --root .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@colyseus/core": "^0.17.50",
+    "@colyseus/schema": "4.0.30",
+    "@colyseus/ws-transport": "0.17.13",
+    "@ningacademy/protocol": "*",
+    "express": "5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.6",
+    "tsx": "4.23.12"
+  }
+}

@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Next.js and build output
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Test and tool caches
+.turbo/
+.cache/
+.vitest/
+playwright-report/
+test-results/
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

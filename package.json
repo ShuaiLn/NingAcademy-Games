@@ -1,0 +1,41 @@
+{
+  "name": "ningacademy-game",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": "^22.13.0 || >=24.0.0",
+    "npm": ">=10.9.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build:packages && npm run build:apps",
+    "build:apps": "npm run build --workspace @ningacademy/server && npm run build --workspace @ningacademy/web",
+    "build:packages": "npm run build --workspace @ningacademy/game-core && npm run build --workspace @ningacademy/protocol && npm run build --workspace @ningacademy/authority && npm run build --workspace @ningacademy/content && npm run build --workspace @ningacademy/testkit",
+    "check:boundaries": "node scripts/verify-boundaries.mjs",
+    "check:staging-target": "node scripts/verify-staging-target.mjs",
+    "predev": "npm run build:packages",
+    "dev": "npm run dev --workspaces --if-present --parallel",
+    "dev:web": "npm run dev --workspace @ningacademy/web",
+    "predev:server": "npm run build:packages",
+    "dev:server": "npm run dev --workspace @ningacademy/server",
+    "prelint": "npm run build:packages",
+    "lint": "npm run lint --workspaces --if-present",
+    "pretest": "npm run build:packages",
+    "pretypecheck": "npm run build:packages",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@types/node": "26.2.0",
+    "eslint": "9.39.5",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.67.0",
+    "vitest": "4.1.10",
+    "zod": "4.4.3"
+  }
+}
