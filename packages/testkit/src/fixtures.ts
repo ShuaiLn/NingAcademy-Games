@@ -1,4 +1,5 @@
 import {
+  advanceGameSimulation,
   createInitialGameState,
   reduceGameCommand,
   type GameCommand,
@@ -90,6 +91,30 @@ export function createReadyLobbyFixture(): GameState {
 export function createStartedRoomFixture(): GameState {
   const lobby = createReadyLobbyFixture();
   return applyTestUserCommand(lobby, TEST_USERS.alice.userId, { type: "room.start" }).state;
+}
+
+export interface StartedCombatFixture {
+  readonly playerId: string;
+  readonly state: GameState;
+}
+
+export function createStartedCombatFixture(): StartedCombatFixture {
+  let state = createTestState({ maxPlayers: 1 });
+  state = applyTestUserCommand(state, TEST_USERS.alice.userId, {
+    type: "player.join",
+    displayName: TEST_USERS.alice.displayName,
+  }).state;
+  state = applyTestUserCommand(state, TEST_USERS.alice.userId, {
+    type: "player.ready",
+    ready: true,
+  }).state;
+  state = applyTestUserCommand(state, TEST_USERS.alice.userId, { type: "room.start" }).state;
+  return { playerId: TEST_USERS.alice.userId, state };
+}
+
+export function advanceTestCombat(state: GameState, tickCount = 1): AppliedTestCommand {
+  const result = advanceGameSimulation(state, tickCount);
+  return { state: result.state, events: result.events };
 }
 
 export interface TestEnvelopeOptions {

@@ -1,5 +1,12 @@
 import { createRandomState, shuffle } from "./prng.js";
 import {
+  advanceCombatTicks,
+  createCombatStartedEvent,
+  createCombatState,
+  reduceCombatCommand,
+} from "./combat.js";
+import type { CombatCommand, CombatEvent } from "./combat-types.js";
+import {
   GAME_STATE_SCHEMA_VERSION,
   MAX_RECENT_COMMAND_IDS,
   type CreateGameStateOptions,
@@ -57,6 +64,8 @@ export function createInitialGameState(options: CreateGameStateOptions): GameSta
     players: {},
     activePlayerIds: [],
     turnOrder: [],
+    combat: null,
+    combatBiome: options.combatBiome ?? "house",
     rng: createRandomState(options.seed),
     recentCommandIds: [],
   };
@@ -202,6 +211,12 @@ function reduceStart(state: GameState, input: GameCommandInput): ReductionResult
   }
 
   const orderDraw = shuffle(state.rng, currentPlayers);
+  const combat = createCombatState({
+    biome: state.combatBiome,
+    playerIds: currentPlayers,
+    seed: `${state.roomId}:${orderDraw.state.state}:combat-v1`,
+    startedAtMs: input.atMs,
+  });
   const players = { ...state.players };
   for (const id of currentPlayers) {
     const player = players[id];
@@ -218,10 +233,36 @@ function reduceStart(state: GameState, input: GameCommandInput): ReductionResult
       startedAtMs: input.atMs,
       players,
       turnOrder: orderDraw.value,
+      combat,
       rng: orderDraw.state,
     },
-    [{ type: "room.started", turnOrder: orderDraw.value }],
+    [
+      { type: "room.started", turnOrder: orderDraw.value },
+      createCombatStartedEvent(combat),
+    ],
   );
+}
+
+function reduceCombat(
+  state: GameState,
+  input: GameCommandInput,
+  command: CombatCommand,
+): ReductionResult {
+  if (state.status !== "running" || state.combat === null) {
+    return reject(state, "COMBAT_NOT_STARTED", "Combat commands require a running room");
+  }
+
+  const playerId = userPlayerId(input.actor);
+  if (playerId === null) {
+    return reject(state, "INVALID_ACTOR", "Combat commands require an authenticated user actor");
+  }
+
+  const result = reduceCombatCommand(state.combat, playerId, command);
+  if (!result.accepted) {
+    return reject(state, result.error.code, result.error.message);
+  }
+
+  return accept(state, input.commandId, { combat: result.state }, result.events);
 }
 
 function reduceLeave(state: GameState, input: GameCommandInput): ReductionResult {
@@ -341,9 +382,38 @@ export function reduceGameCommand(state: GameState, input: GameCommandInput): Re
       return reduceStart(state, input);
     case "room.end":
       return reduceEnd(state, input);
+    case "combat.input":
+    case "combat.fire":
+    case "combat.reload":
+      return reduceCombat(state, input, input.command);
     default: {
       const exhaustiveCommand: never = input.command;
       return reject(state, "INVALID_COMMAND", `Unknown command: ${String(exhaustiveCommand)}`);
     }
   }
+}
+
+export interface GameSimulationResult {
+  readonly state: GameState;
+  readonly events: readonly CombatEvent[];
+}
+
+/**
+ * Server-only fixed-step seam. Network clients cannot submit tick commands;
+ * the authoritative room calls this from its 30 Hz simulation interval.
+ */
+export function advanceGameSimulation(state: GameState, tickCount = 1): GameSimulationResult {
+  if (state.status !== "running" || state.combat === null) {
+    throw new Error("Cannot advance combat before the room is running");
+  }
+
+  const result = advanceCombatTicks(state.combat, tickCount);
+  return {
+    events: result.events,
+    state: {
+      ...state,
+      combat: result.state,
+      revision: state.revision + tickCount,
+    },
+  };
 }

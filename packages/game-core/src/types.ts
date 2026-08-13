@@ -1,3 +1,11 @@
+import type {
+  CombatBiome,
+  CombatCommand,
+  CombatEvent,
+  CombatRuleErrorCode,
+  CombatState,
+} from "./combat-types.js";
+
 export const GAME_STATE_SCHEMA_VERSION = 1 as const;
 export const MAX_RECENT_COMMAND_IDS = 128;
 
@@ -38,6 +46,8 @@ export interface GameState {
   readonly players: Readonly<Record<PlayerId, PlayerState>>;
   readonly activePlayerIds: readonly PlayerId[];
   readonly turnOrder: readonly PlayerId[];
+  readonly combat: CombatState | null;
+  readonly combatBiome: CombatBiome;
   readonly rng: RandomState;
   readonly recentCommandIds: readonly string[];
 }
@@ -51,7 +61,8 @@ export type GameCommand =
   | { readonly type: "player.ready"; readonly ready: boolean }
   | { readonly type: "player.leave" }
   | { readonly type: "room.start" }
-  | { readonly type: "room.end"; readonly reason: Exclude<RoomEndReason, "empty"> };
+  | { readonly type: "room.end"; readonly reason: Exclude<RoomEndReason, "empty"> }
+  | CombatCommand;
 
 export type GameEvent =
   | {
@@ -64,7 +75,8 @@ export type GameEvent =
   | { readonly type: "player.left"; readonly playerId: PlayerId }
   | { readonly type: "host.changed"; readonly playerId: PlayerId | null }
   | { readonly type: "room.started"; readonly turnOrder: readonly PlayerId[] }
-  | { readonly type: "room.ended"; readonly reason: RoomEndReason };
+  | { readonly type: "room.ended"; readonly reason: RoomEndReason }
+  | CombatEvent;
 
 export interface GameCommandInput {
   readonly commandId: string;
@@ -84,7 +96,8 @@ export type GameRuleErrorCode =
   | "ROOM_FULL"
   | "NOT_HOST"
   | "PLAYERS_NOT_READY"
-  | "REVISION_CONFLICT";
+  | "REVISION_CONFLICT"
+  | CombatRuleErrorCode;
 
 export interface GameRuleError {
   readonly code: GameRuleErrorCode;
@@ -111,4 +124,5 @@ export interface CreateGameStateOptions {
   readonly seed: number | string;
   readonly nowMs: number;
   readonly maxPlayers?: number;
+  readonly combatBiome?: CombatBiome;
 }

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   TEST_USERS,
   createReadyLobbyFixture,
+  createStartedCombatFixture,
   createStartedRoomFixture,
   createTestCommandEnvelope,
 } from "../src/index.js";
@@ -14,6 +15,15 @@ describe("testkit fixtures", () => {
     expect(state.status).toBe("lobby");
     expect(state.activePlayerIds).toEqual([TEST_USERS.alice.userId, TEST_USERS.bob.userId]);
     expect(state.activePlayerIds.every((id) => state.players[id]?.ready)).toBe(true);
+  });
+
+  it("creates a server-authoritative combat fixture", () => {
+    const fixture = createStartedCombatFixture();
+
+    expect(fixture.state.status).toBe("running");
+    expect(fixture.state.combat?.survivors[fixture.playerId]).toBeDefined();
+    expect(fixture.state.combat?.thrall.id).toBe("thrall-0");
+    expect(fixture.state.combat?.history).toHaveLength(1);
   });
 
   it("creates a deterministic started room", () => {

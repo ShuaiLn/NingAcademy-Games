@@ -4,6 +4,7 @@ import type {
   GameRuleError,
   RoomEndReason,
 } from "@ningacademy/game-core";
+import { isCombatCommand, isCombatEvent } from "./combat.js";
 
 export const PROTOCOL_VERSION = 1 as const;
 
@@ -107,6 +108,10 @@ export function isGameCommand(value: unknown): value is GameCommand {
       return hasExactKeys(value, ["type"]);
     case "room.end":
       return hasExactKeys(value, ["type", "reason"]) && isRoomEndReason(value.reason);
+    case "combat.input":
+    case "combat.fire":
+    case "combat.reload":
+      return isCombatCommand(value);
     default:
       return false;
   }
@@ -149,6 +154,13 @@ function isGameEvent(value: unknown): value is GameEvent {
         hasExactKeys(value, ["type", "reason"]) &&
         (isRoomEndReason(value.reason) || value.reason === "empty")
       );
+    case "combat.started":
+    case "combat.shot_fired":
+    case "combat.entity_damaged":
+    case "combat.entity_killed":
+    case "combat.death_cue":
+    case "combat.entity_respawned":
+      return isCombatEvent(value);
     default:
       return false;
   }
