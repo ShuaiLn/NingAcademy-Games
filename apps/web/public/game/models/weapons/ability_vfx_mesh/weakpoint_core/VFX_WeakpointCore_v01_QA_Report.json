@@ -1,0 +1,31 @@
+{
+  "asset_id": "VFX_WeakpointCore_v01",
+  "status": "PASS",
+  "production_metrics": {
+    "file_size_bytes": 28108,
+    "dimensions_m_xyz": [
+      0.295,
+      0.235,
+      0.295
+    ],
+    "triangles": 344,
+    "meshes": 7,
+    "materials": 2,
+    "skins": 0,
+    "animations": 0
+  },
+  "checks": {
+    "fp_tp_variant_explicit": "PASS",
+    "metric_scale": "PASS",
+    "origin_contract": "PASS",
+    "required_sockets_exported": "PASS",
+    "independent_gameplay_parts": "PASS",
+    "pbr_metallic_roughness": "PASS",
+    "material_count_max_3": "PASS",
+    "triangle_budget": "PASS",
+    "naming_standard": "PASS",
+    "no_camera_or_light": "PASS",
+    "glb_binary_roundtrip": "PASS"
+  },
+  "notes": "Prototype/basic production mesh; budgets are upper limits, not density targets."
+}

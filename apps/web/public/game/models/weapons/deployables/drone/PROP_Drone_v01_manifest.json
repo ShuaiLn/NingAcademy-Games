@@ -1,0 +1,85 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "PROP_Drone_v01.glb",
+  "asset_id": "PROP_Drone_v01",
+  "root_node": "PROP_Drone",
+  "category": "deployable",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    0.93,
+    0.73,
+    0.24
+  ],
+  "render": {
+    "mesh_count": 5,
+    "triangle_count": 1264,
+    "triangle_budget_max": 3500,
+    "materials": [
+      "MAT_PROP_Drone",
+      "MAT_PROP_Drone_Emissive",
+      "MAT_PROP_Drone_Detail"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Muzzle",
+    "SOCKET_Placement"
+  ],
+  "rig": {
+    "name": "SKEL_Drone",
+    "bones": 6,
+    "animations": [
+      "ANIM_Idle",
+      "ANIM_Move",
+      "ANIM_Attack"
+    ]
+  },
+  "runtime_contract": {
+    "animation_states": [
+      "Idle",
+      "Move",
+      "Attack"
+    ],
+    "placement_preview": "material_state"
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 84748,
+    "nodes": 15,
+    "meshes": 5,
+    "materials": 3,
+    "skins": 1,
+    "animations": 3,
+    "animation_names": [
+      "ANIM_Attack",
+      "ANIM_Idle",
+      "ANIM_Move"
+    ],
+    "node_names": [
+      "Sensor",
+      "Thruster_FL",
+      "Thruster_FR",
+      "Thruster_RL",
+      "Thruster_RR",
+      "Root",
+      "MESH_DroneBody",
+      "MESH_Thruster_FL",
+      "MESH_Thruster_FR",
+      "MESH_Thruster_RL",
+      "MESH_Thruster_RR",
+      "SKEL_Drone",
+      "SOCKET_Muzzle",
+      "SOCKET_Placement",
+      "PROP_Drone"
+    ],
+    "mesh_primitives": 11,
+    "total_length": 84748
+  }
+}

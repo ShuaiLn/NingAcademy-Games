@@ -1,0 +1,231 @@
+{
+  "asset": "CHR_ENEMY_ThrallBase_v01.glb",
+  "validated_file": "/mnt/user-data/outputs/CHR_ENEMY_ThrallBase_v01.glb",
+  "method": "the exported GLB was reloaded from disk and validated independently of the build scene; linear blend skinning was re-implemented to replay all 12 clips",
+  "result": "PASS",
+  "failures": [],
+  "warnings": [],
+  "checks": {
+    "skeleton_joint_count": "PASS",
+    "bone_names_match": "PASS",
+    "bone_hierarchy_match": "PASS",
+    "rest_pose_match": "PASS",
+    "inverse_bind_matrices_match": "PASS",
+    "no_extra_joints": "PASS",
+    "animation_count": "PASS",
+    "animation_names_match": "PASS",
+    "animation_tracks_valid": "PASS",
+    "animation_timing_identical": "PASS",
+    "triangle_budget": "PASS",
+    "degenerate_triangles_zero": "PASS",
+    "no_nan_vertices": "PASS",
+    "normals_consistent": "PASS",
+    "uv0_present": "PASS",
+    "uv0_in_range": "PASS",
+    "uv_no_severe_stretch": "PASS",
+    "uv_no_wrap_triangles": "PASS",
+    "no_nonmanifold_edges": "PASS",
+    "closed_components_outward": "PASS",
+    "no_unweighted_vertices": "PASS",
+    "weight_normalization": "PASS",
+    "skin_influence_limit": "PASS",
+    "valid_joint_indices": "PASS",
+    "material_count": "PASS",
+    "no_duplicate_material": "PASS",
+    "no_unused_material": "PASS",
+    "pbr_metallic_roughness": "PASS",
+    "no_double_sided": "PASS",
+    "no_extensions": "PASS",
+    "texture_embedded": "PASS",
+    "texture_resolution": "PASS",
+    "no_missing_texture": "PASS",
+    "socket_validation": "PASS",
+    "socket_transforms_unchanged": "PASS",
+    "hurtbox_validation": "PASS",
+    "hitbox_validation": "PASS",
+    "collision_validation": "PASS",
+    "shard_emitters_present": "PASS",
+    "shard_emitters_not_joints": "PASS",
+    "mesh_structure": "PASS",
+    "naming_standard": "PASS",
+    "no_weapon_mesh": "PASS",
+    "scale": "PASS",
+    "pivot": "PASS",
+    "all_animations_deform_mesh": "PASS",
+    "crystal_roots_stay_fused": "PASS",
+    "core_locked_to_socket_chest": "PASS",
+    "skinning_finite": "PASS",
+    "no_weight_explosion": "PASS"
+  },
+  "measurements": {
+    "triangles": 4379,
+    "vertices": 3891,
+    "degenerate_triangles": 0,
+    "min_triangle_area": 4.4389779e-05,
+    "nan_values": 0,
+    "uv_stretch_ratio_p99": 3.312,
+    "uv_stretch_ratio_max": 3.552,
+    "uv_wrap_triangles": 0,
+    "nonmanifold_edges": 0,
+    "closed_components": 27,
+    "open_components": 35,
+    "nonpositive_closed_components": 0,
+    "max_skin_influences": 2,
+    "max_weight_sum_error": 3e-08,
+    "texture_sizes": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "crystal_root_vertices_tested": 148,
+    "worst_edge_stretch_ratio": 2.248,
+    "worst_crystal_root_separation_m": 0.01816,
+    "core_socket_lock_error_m": 0.0,
+    "master_worst_edge_stretch_ratio": 2.479
+  },
+  "animation_compatibility_test": {
+    "ANIM_Idle_01": {
+      "duration": 2.4,
+      "max_vertex_displacement": 0.2922,
+      "max_edge_stretch_ratio": 1.411,
+      "max_crystal_root_separation_m": 0.01226,
+      "deforms_mesh": true
+    },
+    "ANIM_Idle_02": {
+      "duration": 1.8,
+      "max_vertex_displacement": 0.3702,
+      "max_edge_stretch_ratio": 1.553,
+      "max_crystal_root_separation_m": 0.0122,
+      "deforms_mesh": true
+    },
+    "ANIM_Walk": {
+      "duration": 1.0,
+      "max_vertex_displacement": 0.4155,
+      "max_edge_stretch_ratio": 1.37,
+      "max_crystal_root_separation_m": 0.0122,
+      "deforms_mesh": true
+    },
+    "ANIM_Run": {
+      "duration": 0.7,
+      "max_vertex_displacement": 0.6383,
+      "max_edge_stretch_ratio": 1.415,
+      "max_crystal_root_separation_m": 0.0122,
+      "deforms_mesh": true
+    },
+    "ANIM_Attack_01": {
+      "duration": 0.6,
+      "max_vertex_displacement": 0.8078,
+      "max_edge_stretch_ratio": 1.998,
+      "max_crystal_root_separation_m": 0.0122,
+      "deforms_mesh": true
+    },
+    "ANIM_Attack_02": {
+      "duration": 0.75,
+      "max_vertex_displacement": 0.9236,
+      "max_edge_stretch_ratio": 1.803,
+      "max_crystal_root_separation_m": 0.0122,
+      "deforms_mesh": true
+    },
+    "ANIM_Hit_Front": {
+      "duration": 0.46,
+      "max_vertex_displacement": 0.2656,
+      "max_edge_stretch_ratio": 1.479,
+      "max_crystal_root_separation_m": 0.0122,
+      "deforms_mesh": true
+    },
+    "ANIM_Hit_Back": {
+      "duration": 0.46,
+      "max_vertex_displacement": 0.537,
+      "max_edge_stretch_ratio": 1.87,
+      "max_crystal_root_separation_m": 0.0122,
+      "deforms_mesh": true
+    },
+    "ANIM_Death_01": {
+      "duration": 1.65,
+      "max_vertex_displacement": 1.8369,
+      "max_edge_stretch_ratio": 2.111,
+      "max_crystal_root_separation_m": 0.0123,
+      "deforms_mesh": true
+    },
+    "ANIM_Death_02": {
+      "duration": 1.55,
+      "max_vertex_displacement": 1.9618,
+      "max_edge_stretch_ratio": 2.17,
+      "max_crystal_root_separation_m": 0.01816,
+      "deforms_mesh": true
+    },
+    "ANIM_Spawn": {
+      "duration": 1.15,
+      "max_vertex_displacement": 0.8731,
+      "max_edge_stretch_ratio": 2.248,
+      "max_crystal_root_separation_m": 0.0122,
+      "deforms_mesh": true
+    },
+    "ANIM_Stagger": {
+      "duration": 0.58,
+      "max_vertex_displacement": 0.5879,
+      "max_edge_stretch_ratio": 1.6,
+      "max_crystal_root_separation_m": 0.0122,
+      "deforms_mesh": true
+    }
+  },
+  "attachment_sets": {
+    "House": {
+      "file": "ATT_House_Thrall_A_v01.glb",
+      "triangles": 630,
+      "parts": 7,
+      "materials": 1,
+      "texture": "512x512",
+      "bytes": 222544,
+      "silhouette": "short thick hexagonal prisms, dense cluster, straight sharp cracks"
+    },
+    "Grass": {
+      "file": "ATT_Grass_Thrall_A_v01.glb",
+      "triangles": 686,
+      "parts": 7,
+      "materials": 1,
+      "texture": "512x512",
+      "bytes": 226776,
+      "silhouette": "rounded spore caps plus a few short filaments, vein-like cracks"
+    },
+    "Desert": {
+      "file": "ATT_Desert_Thrall_A_v01.glb",
+      "triangles": 420,
+      "parts": 7,
+      "materials": 1,
+      "texture": "512x512",
+      "bytes": 171356,
+      "silhouette": "flat weathered plates fanning outward, rounded edges, grainy"
+    },
+    "Hell": {
+      "file": "ATT_Hell_Thrall_A_v01.glb",
+      "triangles": 420,
+      "parts": 7,
+      "materials": 1,
+      "texture": "512x512",
+      "bytes": 180544,
+      "silhouette": "obsidian body with orange ember veins, long sharp spikes"
+    }
+  }
+}

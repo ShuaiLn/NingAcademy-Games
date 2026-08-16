@@ -1,0 +1,164 @@
+{
+  "standard": "NingAcademy Games Boss Asset Naming Standard v1.0",
+  "file": "CHR_BOSS_Swarm_v01.glb",
+  "asset_id": "CHR_BOSS_Swarm_v01",
+  "boss_id": "swarm",
+  "version": "v01",
+  "source_file": "Swarm.glb",
+  "self_contained": true,
+  "controllers": [
+    "AIController",
+    "PlayerController"
+  ],
+  "biome_bound": false,
+  "affix_logic_in_glb": false,
+  "root_motion": false,
+  "dimensions_m": [
+    2.354,
+    2.024,
+    4.102
+  ],
+  "render": {
+    "mesh_count": 6,
+    "triangle_count": 14052,
+    "materials": [
+      "MAT_BOSS_Swarm_Armor",
+      "MAT_BOSS_Swarm_Body",
+      "MAT_BOSS_Swarm_Organ"
+    ],
+    "texture_resolution": "1024x1024",
+    "texture_profile": "Mobile 1K"
+  },
+  "skeleton": {
+    "name": "SKEL_BOSS_Swarm",
+    "bones": 43,
+    "skins": 1,
+    "max_vertex_influences": 3
+  },
+  "animations": [
+    "idle",
+    "walk",
+    "run",
+    "attack_primary",
+    "ability_cast",
+    "hit",
+    "death",
+    "phase_change",
+    "shield_phase",
+    "stagger",
+    "break_react",
+    "ultimate",
+    "summon",
+    "summon_prepare",
+    "hive_open"
+  ],
+  "animation_interface_required": [
+    "idle",
+    "walk",
+    "run",
+    "attack_primary",
+    "ability_cast",
+    "hit",
+    "death",
+    "phase_change",
+    "shield_phase",
+    "stagger",
+    "break_react",
+    "ultimate",
+    "summon"
+  ],
+  "breakables": [
+    "BRK_SpawnSac_L",
+    "BRK_SpawnSac_R",
+    "MESH_BOSS_Swarm_Hive"
+  ],
+  "weakpoint": {
+    "id": "HiveCore",
+    "meshes": [
+      "MESH_BOSS_Swarm_Weakpoint_HiveCore"
+    ],
+    "hitbox": "HIT_Weakpoint"
+  },
+  "technical_nodes": {
+    "representation": "GLTF_EMPTY_WITH_EXTRAS",
+    "renderable": false,
+    "collision": [
+      "COL_Body"
+    ],
+    "hitboxes": [
+      "HIT_Head",
+      "HIT_Torso",
+      "HIT_Pelvis",
+      "HIT_Arm_L",
+      "HIT_Arm_R",
+      "HIT_Leg_L",
+      "HIT_Leg_R",
+      "HIT_Weakpoint"
+    ],
+    "extras_contract": [
+      "runtime_component",
+      "collision_only",
+      "renderable",
+      "shape",
+      "local_dimensions",
+      "half_extents",
+      "radius",
+      "height",
+      "parent_bone"
+    ]
+  },
+  "sockets": [
+    "SOCKET_Camera",
+    "SOCKET_Aim",
+    "SOCKET_Hand_L",
+    "SOCKET_Hand_R",
+    "SOCKET_Ability",
+    "SOCKET_GroundFX",
+    "SOCKET_CoreFX",
+    "SOCKET_ShieldFX",
+    "SOCKET_Spawn_L",
+    "SOCKET_Spawn_R",
+    "SOCKET_BackSpawn"
+  ],
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "nodes": 71,
+    "meshes": 6,
+    "skins": 1,
+    "materials": 3,
+    "images": 3,
+    "animations": 15,
+    "animation_names": [
+      "ability_cast",
+      "attack_primary",
+      "break_react",
+      "death",
+      "hit",
+      "hive_open",
+      "idle",
+      "phase_change",
+      "run",
+      "shield_phase",
+      "stagger",
+      "summon",
+      "summon_prepare",
+      "ultimate",
+      "walk"
+    ],
+    "triangles": 14052,
+    "technical_nodes": [
+      "HIT_Weakpoint",
+      "HIT_Arm_L",
+      "HIT_Arm_R",
+      "HIT_Head",
+      "HIT_Torso",
+      "HIT_Leg_L",
+      "HIT_Leg_R",
+      "HIT_Pelvis",
+      "COL_Body"
+    ],
+    "technical_nodes_with_mesh": 0,
+    "white_collision_geometry_removed": true,
+    "file_size_bytes": 4128280
+  }
+}

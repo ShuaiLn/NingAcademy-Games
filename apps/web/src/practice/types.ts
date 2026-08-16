@@ -59,6 +59,7 @@ export interface RoleGateState {
   readonly correctCount: number;
   readonly feedback: PracticeQuestionFeedback | null;
   readonly question: PublicPracticeQuestion;
+  readonly questionCount: number;
   readonly requiredCorrect: number;
   readonly roleId: SurvivorRoleId;
 }

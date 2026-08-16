@@ -1,0 +1,55 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "VFX_PlagueGroundPatch_v01.glb",
+  "asset_id": "VFX_PlagueGroundPatch_v01",
+  "root_node": "VFX_PlagueGroundPatch",
+  "category": "vfx",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    3.7163,
+    3.9313,
+    0.0
+  ],
+  "render": {
+    "mesh_count": 1,
+    "triangle_count": 24,
+    "triangle_budget_max": 5000,
+    "materials": [
+      "MAT_VFX_PlagueGroundPatch"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "diameter_m": 4.0,
+    "ground_offset_required_m": 0.01
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 2228,
+    "nodes": 2,
+    "meshes": 1,
+    "materials": 1,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_PlagueGroundPatch",
+      "VFX_PlagueGroundPatch"
+    ],
+    "mesh_primitives": 1,
+    "total_length": 2228
+  }
+}

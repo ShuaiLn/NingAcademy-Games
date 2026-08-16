@@ -1,0 +1,981 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "generator": "build_weapon_assets.py",
+  "defined_weapon_versions": 14,
+  "weapon_models_fp_tp": 28,
+  "consumable_models_fp_world_tp": 8,
+  "core_deployable_and_vfx_models": 10,
+  "shared_hit_feedback_packs": 5,
+  "world_and_shared_vfx_models": 15,
+  "generated_model_total": 51,
+  "stage3_spec_pending": [
+    "Laser_Stage3",
+    "Plasma_Stage3",
+    "Staff_Stage3"
+  ],
+  "qa": {
+    "status": "PASS",
+    "failed_assets": [],
+    "fp_tp_pair_consistency": [
+      {
+        "asset": "PROP_AmmoBox_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "PROP_Bandage_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "PROP_Grenade_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "PROP_Medkit_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_LaserRifle_A_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_LaserRifle_Fusion_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_Lightsaber_A_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_Lightsaber_Complete_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_Lightsaber_Prototype_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_PlasmaCannon_A_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_PlasmaCannon_Singularity_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_Rifle_Assault_A_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_Rifle_Sniper_A_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_SMG_A_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_Spear_A_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_Staff_Elemental_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_Staff_Singularity_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      },
+      {
+        "asset": "WPN_Sword_A_v01",
+        "status": "PASS",
+        "max_dimension_delta_m": 0.0
+      }
+    ]
+  },
+  "assets": [
+    {
+      "asset_id": "WPN_Rifle_Sniper_A_FP_v01",
+      "folder": "starter/sniper/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.3216,
+        1.415,
+        0.6363
+      ],
+      "triangles": 572,
+      "materials": 3,
+      "meshes": 7,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 46136,
+      "display_name": "Sniper"
+    },
+    {
+      "asset_id": "WPN_Rifle_Sniper_A_TP_v01",
+      "folder": "starter/sniper/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.3216,
+        1.415,
+        0.6363
+      ],
+      "triangles": 508,
+      "materials": 3,
+      "meshes": 7,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 42772,
+      "display_name": "Sniper"
+    },
+    {
+      "asset_id": "WPN_Rifle_Assault_A_FP_v01",
+      "folder": "starter/assault_rifle/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.143,
+        1.1775,
+        0.4809
+      ],
+      "triangles": 484,
+      "materials": 2,
+      "meshes": 5,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 40448,
+      "display_name": "AssaultRifle"
+    },
+    {
+      "asset_id": "WPN_Rifle_Assault_A_TP_v01",
+      "folder": "starter/assault_rifle/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.143,
+        1.1775,
+        0.4809
+      ],
+      "triangles": 452,
+      "materials": 2,
+      "meshes": 5,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 38720,
+      "display_name": "AssaultRifle"
+    },
+    {
+      "asset_id": "WPN_SMG_A_FP_v01",
+      "folder": "starter/smg/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.1585,
+        0.7775,
+        0.5059
+      ],
+      "triangles": 384,
+      "materials": 2,
+      "meshes": 4,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 33164,
+      "display_name": "SMG"
+    },
+    {
+      "asset_id": "WPN_SMG_A_TP_v01",
+      "folder": "starter/smg/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.1585,
+        0.7775,
+        0.5059
+      ],
+      "triangles": 352,
+      "materials": 2,
+      "meshes": 4,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 31432,
+      "display_name": "SMG"
+    },
+    {
+      "asset_id": "WPN_Spear_A_FP_v01",
+      "folder": "starter/spear/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.144,
+        2.13,
+        0.144
+      ],
+      "triangles": 340,
+      "materials": 2,
+      "meshes": 1,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 18132,
+      "display_name": "Spear"
+    },
+    {
+      "asset_id": "WPN_Spear_A_TP_v01",
+      "folder": "starter/spear/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.144,
+        2.13,
+        0.144
+      ],
+      "triangles": 228,
+      "materials": 2,
+      "meshes": 1,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 13968,
+      "display_name": "Spear"
+    },
+    {
+      "asset_id": "WPN_Sword_A_FP_v01",
+      "folder": "starter/sword/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.32,
+        1.305,
+        0.1
+      ],
+      "triangles": 536,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 32236,
+      "display_name": "Sword"
+    },
+    {
+      "asset_id": "WPN_Sword_A_TP_v01",
+      "folder": "starter/sword/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.32,
+        1.305,
+        0.1
+      ],
+      "triangles": 384,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 27032,
+      "display_name": "Sword"
+    },
+    {
+      "asset_id": "WPN_Lightsaber_Prototype_FP_v01",
+      "folder": "advanced/lightsaber_prototype/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.11,
+        1.28,
+        0.11
+      ],
+      "triangles": 440,
+      "materials": 3,
+      "meshes": 2,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 19872,
+      "display_name": "Lightsaber_Prototype"
+    },
+    {
+      "asset_id": "WPN_Lightsaber_Prototype_TP_v01",
+      "folder": "advanced/lightsaber_prototype/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.11,
+        1.28,
+        0.11
+      ],
+      "triangles": 280,
+      "materials": 3,
+      "meshes": 2,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 15096,
+      "display_name": "Lightsaber_Prototype"
+    },
+    {
+      "asset_id": "WPN_Lightsaber_A_FP_v01",
+      "folder": "advanced/lightsaber/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.11,
+        1.36,
+        0.11
+      ],
+      "triangles": 528,
+      "materials": 3,
+      "meshes": 2,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 26460,
+      "display_name": "Lightsaber"
+    },
+    {
+      "asset_id": "WPN_Lightsaber_A_TP_v01",
+      "folder": "advanced/lightsaber/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.11,
+        1.36,
+        0.11
+      ],
+      "triangles": 368,
+      "materials": 3,
+      "meshes": 2,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 21688,
+      "display_name": "Lightsaber"
+    },
+    {
+      "asset_id": "WPN_Lightsaber_Complete_FP_v01",
+      "folder": "advanced/lightsaber_complete/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.156,
+        2.0,
+        0.156
+      ],
+      "triangles": 748,
+      "materials": 3,
+      "meshes": 2,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 35764,
+      "display_name": "Lightsaber_Complete"
+    },
+    {
+      "asset_id": "WPN_Lightsaber_Complete_TP_v01",
+      "folder": "advanced/lightsaber_complete/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.156,
+        2.0,
+        0.156
+      ],
+      "triangles": 508,
+      "materials": 3,
+      "meshes": 2,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 28460,
+      "display_name": "Lightsaber_Complete"
+    },
+    {
+      "asset_id": "WPN_LaserRifle_A_FP_v01",
+      "folder": "advanced/laser_gun/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.185,
+        1.045,
+        0.4042
+      ],
+      "triangles": 472,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 39240,
+      "display_name": "LaserGun"
+    },
+    {
+      "asset_id": "WPN_LaserRifle_A_TP_v01",
+      "folder": "advanced/laser_gun/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.185,
+        1.045,
+        0.4042
+      ],
+      "triangles": 440,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 37512,
+      "display_name": "LaserGun"
+    },
+    {
+      "asset_id": "WPN_LaserRifle_Fusion_FP_v01",
+      "folder": "advanced/fusion_laser/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.185,
+        1.045,
+        0.4382
+      ],
+      "triangles": 648,
+      "materials": 3,
+      "meshes": 4,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 53152,
+      "display_name": "FusionLaser"
+    },
+    {
+      "asset_id": "WPN_LaserRifle_Fusion_TP_v01",
+      "folder": "advanced/fusion_laser/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.185,
+        1.045,
+        0.4382
+      ],
+      "triangles": 616,
+      "materials": 3,
+      "meshes": 4,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 51424,
+      "display_name": "FusionLaser"
+    },
+    {
+      "asset_id": "WPN_PlasmaCannon_A_FP_v01",
+      "folder": "advanced/plasma_cannon/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.232,
+        1.105,
+        0.4402
+      ],
+      "triangles": 456,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 30076,
+      "display_name": "PlasmaCannon"
+    },
+    {
+      "asset_id": "WPN_PlasmaCannon_A_TP_v01",
+      "folder": "advanced/plasma_cannon/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.232,
+        1.105,
+        0.4402
+      ],
+      "triangles": 360,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 26776,
+      "display_name": "PlasmaCannon"
+    },
+    {
+      "asset_id": "WPN_PlasmaCannon_Singularity_FP_v01",
+      "folder": "advanced/singularity_plasma/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.252,
+        1.105,
+        0.4502
+      ],
+      "triangles": 616,
+      "materials": 3,
+      "meshes": 4,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 34208,
+      "display_name": "SingularityPlasma"
+    },
+    {
+      "asset_id": "WPN_PlasmaCannon_Singularity_TP_v01",
+      "folder": "advanced/singularity_plasma/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.252,
+        1.105,
+        0.4502
+      ],
+      "triangles": 456,
+      "materials": 3,
+      "meshes": 4,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 29720,
+      "display_name": "SingularityPlasma"
+    },
+    {
+      "asset_id": "WPN_Staff_Elemental_FP_v01",
+      "folder": "advanced/elemental_staff/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.1902,
+        2.07,
+        0.2
+      ],
+      "triangles": 360,
+      "materials": 3,
+      "meshes": 2,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 18172,
+      "display_name": "ElementalStaff"
+    },
+    {
+      "asset_id": "WPN_Staff_Elemental_TP_v01",
+      "folder": "advanced/elemental_staff/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.1902,
+        2.07,
+        0.2
+      ],
+      "triangles": 264,
+      "materials": 3,
+      "meshes": 2,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 14868,
+      "display_name": "ElementalStaff"
+    },
+    {
+      "asset_id": "WPN_Staff_Singularity_FP_v01",
+      "folder": "advanced/singularity_staff/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.4033,
+        2.015,
+        0.41
+      ],
+      "triangles": 584,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 27276,
+      "display_name": "SingularityStaff"
+    },
+    {
+      "asset_id": "WPN_Staff_Singularity_TP_v01",
+      "folder": "advanced/singularity_staff/tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.4033,
+        2.015,
+        0.41
+      ],
+      "triangles": 384,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 21364,
+      "display_name": "SingularityStaff"
+    },
+    {
+      "asset_id": "PROP_Grenade_FP_v01",
+      "folder": "consumables/grenade/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.157,
+        0.13,
+        0.187
+      ],
+      "triangles": 548,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 27356,
+      "display_name": "Grenade"
+    },
+    {
+      "asset_id": "PROP_Grenade_WorldTP_v01",
+      "folder": "consumables/grenade/world_tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.157,
+        0.13,
+        0.187
+      ],
+      "triangles": 420,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 22728,
+      "display_name": "Grenade"
+    },
+    {
+      "asset_id": "PROP_Bandage_FP_v01",
+      "folder": "consumables/bandage/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.156,
+        0.1206,
+        0.156
+      ],
+      "triangles": 296,
+      "materials": 2,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 15756,
+      "display_name": "Bandage"
+    },
+    {
+      "asset_id": "PROP_Bandage_WorldTP_v01",
+      "folder": "consumables/bandage/world_tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.156,
+        0.1206,
+        0.156
+      ],
+      "triangles": 232,
+      "materials": 2,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 13708,
+      "display_name": "Bandage"
+    },
+    {
+      "asset_id": "PROP_Medkit_FP_v01",
+      "folder": "consumables/medkit/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.24,
+        0.115,
+        0.1525
+      ],
+      "triangles": 176,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 17484,
+      "display_name": "Medkit"
+    },
+    {
+      "asset_id": "PROP_Medkit_WorldTP_v01",
+      "folder": "consumables/medkit/world_tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.24,
+        0.115,
+        0.1525
+      ],
+      "triangles": 176,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 17496,
+      "display_name": "Medkit"
+    },
+    {
+      "asset_id": "PROP_AmmoBox_FP_v01",
+      "folder": "consumables/ammo_box/fp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.31,
+        0.212,
+        0.2225
+      ],
+      "triangles": 132,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 13756,
+      "display_name": "AmmoBox"
+    },
+    {
+      "asset_id": "PROP_AmmoBox_WorldTP_v01",
+      "folder": "consumables/ammo_box/world_tp",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.31,
+        0.212,
+        0.2225
+      ],
+      "triangles": 132,
+      "materials": 3,
+      "meshes": 3,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 13764,
+      "display_name": "AmmoBox"
+    },
+    {
+      "asset_id": "PROP_AutoTurret_v01",
+      "folder": "deployables/auto_turret",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.6296,
+        0.7702,
+        0.7441
+      ],
+      "triangles": 564,
+      "materials": 3,
+      "meshes": 5,
+      "skins": 1,
+      "animations": 3,
+      "glb_bytes": 66424,
+      "display_name": "AutoTurret"
+    },
+    {
+      "asset_id": "PROP_ShieldGenerator_v01",
+      "folder": "deployables/shield_generator",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.48,
+        0.48,
+        0.5917
+      ],
+      "triangles": 380,
+      "materials": 3,
+      "meshes": 2,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 19188,
+      "display_name": "ShieldGenerator"
+    },
+    {
+      "asset_id": "VFX_ShieldDome_v01",
+      "folder": "deployables/shield_dome",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        4.7,
+        4.7,
+        2.35
+      ],
+      "triangles": 640,
+      "materials": 1,
+      "meshes": 1,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 13996,
+      "display_name": "ShieldDome"
+    },
+    {
+      "asset_id": "PROP_SlowTrap_v01",
+      "folder": "deployables/slow_trap",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.6,
+        0.6,
+        0.22
+      ],
+      "triangles": 248,
+      "materials": 3,
+      "meshes": 5,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 20536,
+      "display_name": "SlowTrap"
+    },
+    {
+      "asset_id": "PROP_Drone_v01",
+      "folder": "deployables/drone",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.93,
+        0.73,
+        0.24
+      ],
+      "triangles": 1264,
+      "materials": 3,
+      "meshes": 5,
+      "skins": 1,
+      "animations": 3,
+      "glb_bytes": 84748,
+      "display_name": "Drone"
+    },
+    {
+      "asset_id": "PROP_GuardianCrystalShield_v01",
+      "folder": "deployables/guardian_crystal_shield",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        2.055,
+        0.2245,
+        1.48
+      ],
+      "triangles": 352,
+      "materials": 2,
+      "meshes": 7,
+      "skins": 1,
+      "animations": 2,
+      "glb_bytes": 69216,
+      "display_name": "GuardianCrystalShield"
+    },
+    {
+      "asset_id": "VFX_SingularityField_v01",
+      "folder": "ability_vfx_mesh/singularity_field",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        4.0,
+        4.0,
+        4.0
+      ],
+      "triangles": 528,
+      "materials": 1,
+      "meshes": 1,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 15260,
+      "display_name": "SingularityField"
+    },
+    {
+      "asset_id": "VFX_AreaRing_v01",
+      "folder": "ability_vfx_mesh/area_ring",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        2.07,
+        2.07,
+        0.0666
+      ],
+      "triangles": 320,
+      "materials": 1,
+      "meshes": 1,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 10064,
+      "display_name": "AreaRing"
+    },
+    {
+      "asset_id": "VFX_PlagueGroundPatch_v01",
+      "folder": "ability_vfx_mesh/plague_ground_patch",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        3.7163,
+        3.9313,
+        0.0
+      ],
+      "triangles": 24,
+      "materials": 1,
+      "meshes": 1,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 2228,
+      "display_name": "PlagueGroundPatch"
+    },
+    {
+      "asset_id": "VFX_SummonSpawnPortal_v01",
+      "folder": "ability_vfx_mesh/summon_spawn_portal",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        1.55,
+        1.55,
+        0.2326
+      ],
+      "triangles": 736,
+      "materials": 1,
+      "meshes": 1,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 26956,
+      "display_name": "SummonSpawnPortal"
+    },
+    {
+      "asset_id": "VFX_CrystalShards_House_v01",
+      "folder": "ability_vfx_mesh/crystal_shards/house",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.1676,
+        0.1864,
+        0.2161
+      ],
+      "triangles": 160,
+      "materials": 1,
+      "meshes": 8,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 18496,
+      "display_name": "CrystalShards_House"
+    },
+    {
+      "asset_id": "VFX_CrystalShards_Desert_v01",
+      "folder": "ability_vfx_mesh/crystal_shards/desert",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.1676,
+        0.1864,
+        0.2161
+      ],
+      "triangles": 160,
+      "materials": 1,
+      "meshes": 8,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 18496,
+      "display_name": "CrystalShards_Desert"
+    },
+    {
+      "asset_id": "VFX_CrystalShards_Grass_v01",
+      "folder": "ability_vfx_mesh/crystal_shards/grass",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.1676,
+        0.1864,
+        0.2161
+      ],
+      "triangles": 160,
+      "materials": 1,
+      "meshes": 8,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 18496,
+      "display_name": "CrystalShards_Grass"
+    },
+    {
+      "asset_id": "VFX_CrystalShards_Hell_v01",
+      "folder": "ability_vfx_mesh/crystal_shards/hell",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.1676,
+        0.1864,
+        0.2161
+      ],
+      "triangles": 160,
+      "materials": 1,
+      "meshes": 8,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 18476,
+      "display_name": "CrystalShards_Hell"
+    },
+    {
+      "asset_id": "VFX_WeakpointCore_v01",
+      "folder": "ability_vfx_mesh/weakpoint_core",
+      "status": "PASS",
+      "dimensions_m_xyz": [
+        0.295,
+        0.235,
+        0.295
+      ],
+      "triangles": 344,
+      "materials": 2,
+      "meshes": 7,
+      "skins": 0,
+      "animations": 0,
+      "glb_bytes": 28108,
+      "display_name": "WeakpointCore"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "WPN_Staff_Elemental_TP_v01.glb",
+  "asset_id": "WPN_Staff_Elemental_TP_v01",
+  "root_node": "WPN_Staff_Elemental_TP",
+  "category": "weapon",
+  "variant": "TP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.1902,
+    2.07,
+    0.2
+  ],
+  "render": {
+    "mesh_count": 2,
+    "triangle_count": 264,
+    "triangle_budget_max": 3000,
+    "materials": [
+      "MAT_WPN_Staff_Elemental",
+      "MAT_WPN_Staff_Elemental_Detail",
+      "MAT_WPN_Staff_Elemental_Emissive"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Back",
+    "SOCKET_Cast",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Muzzle"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "physical_length_m": 1.91,
+    "special": "independent_focus_crystal"
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 14868,
+    "nodes": 8,
+    "meshes": 2,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_FocusCrystal",
+      "MESH_Weapon",
+      "SOCKET_Back",
+      "SOCKET_Cast",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Muzzle",
+      "WPN_Staff_Elemental_TP"
+    ],
+    "mesh_primitives": 3,
+    "total_length": 14868
+  }
+}

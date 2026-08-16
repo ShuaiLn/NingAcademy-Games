@@ -1,0 +1,67 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "PROP_AmmoBox_WorldTP_v01.glb",
+  "asset_id": "PROP_AmmoBox_WorldTP_v01",
+  "root_node": "PROP_AmmoBox_WorldTP",
+  "category": "consumable",
+  "variant": "WorldTP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.31,
+    0.212,
+    0.2225
+  ],
+  "render": {
+    "mesh_count": 3,
+    "triangle_count": 132,
+    "triangle_budget_max": 3000,
+    "materials": [
+      "MAT_PROP_AmmoBox",
+      "MAT_PROP_AmmoBox_Detail",
+      "MAT_PROP_AmmoBox_Emissive"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Back",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Use"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "special": "runtime_recolorable_label"
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 13764,
+    "nodes": 8,
+    "meshes": 3,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_AmmoLabel",
+      "MESH_Lid",
+      "MESH_Prop",
+      "SOCKET_Back",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Use",
+      "PROP_AmmoBox_WorldTP"
+    ],
+    "mesh_primitives": 3,
+    "total_length": 13764
+  }
+}

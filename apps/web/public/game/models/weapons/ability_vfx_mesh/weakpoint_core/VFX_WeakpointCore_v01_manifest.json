@@ -1,0 +1,66 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "VFX_WeakpointCore_v01.glb",
+  "asset_id": "VFX_WeakpointCore_v01",
+  "root_node": "VFX_WeakpointCore",
+  "category": "vfx",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    0.295,
+    0.235,
+    0.295
+  ],
+  "render": {
+    "mesh_count": 7,
+    "triangle_count": 344,
+    "triangle_budget_max": 5000,
+    "materials": [
+      "MAT_VFX_WeakpointCore_Core",
+      "MAT_VFX_WeakpointCore_Shell"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Impact"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "core_independent": true,
+    "breakable_shell_parts": 6,
+    "damage_logic_embedded": false
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 28108,
+    "nodes": 9,
+    "meshes": 7,
+    "materials": 2,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "BRK_WeakpointShell_01",
+      "BRK_WeakpointShell_02",
+      "BRK_WeakpointShell_03",
+      "BRK_WeakpointShell_04",
+      "BRK_WeakpointShell_05",
+      "BRK_WeakpointShell_06",
+      "MESH_WeakpointCore",
+      "SOCKET_Impact",
+      "VFX_WeakpointCore"
+    ],
+    "mesh_primitives": 7,
+    "total_length": 28108
+  }
+}

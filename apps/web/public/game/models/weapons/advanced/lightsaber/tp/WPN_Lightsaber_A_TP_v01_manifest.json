@@ -1,0 +1,74 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "WPN_Lightsaber_A_TP_v01.glb",
+  "asset_id": "WPN_Lightsaber_A_TP_v01",
+  "root_node": "WPN_Lightsaber_A_TP",
+  "category": "weapon",
+  "variant": "TP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.11,
+    1.36,
+    0.11
+  ],
+  "render": {
+    "mesh_count": 2,
+    "triangle_count": 368,
+    "triangle_budget_max": 3000,
+    "materials": [
+      "MAT_WPN_Lightsaber_A",
+      "MAT_WPN_Lightsaber_A_Detail",
+      "MAT_WPN_Lightsaber_A_Emissive"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Back",
+    "SOCKET_Blade_End",
+    "SOCKET_Blade_Start",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Sweep_End",
+    "SOCKET_Sweep_Start"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "stage": 2,
+    "blade_vfx_baked": false,
+    "trail_vfx_baked": false
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 21688,
+    "nodes": 10,
+    "meshes": 2,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_Blade",
+      "MESH_Handle",
+      "SOCKET_Back",
+      "SOCKET_Blade_End",
+      "SOCKET_Blade_Start",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Sweep_End",
+      "SOCKET_Sweep_Start",
+      "WPN_Lightsaber_A_TP"
+    ],
+    "mesh_primitives": 3,
+    "total_length": 21688
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "standard": "NingAcademy Canonical Survivor V4 StateReady",
+  "glb": "NingAcademy_Survivor_Canonical_V4_StateReady.glb",
+  "weapon_policy": {
+    "embedded_weapon_mesh": false,
+    "embedded_weapon_object": false,
+    "weapon_specific_socket_names": false,
+    "rule": "Weapons must be separate external assets. Survivor GLB contains only generic attachment sockets."
+  },
+  "skeleton": {
+    "version": "SurvivorSkeleton_v3_LOCKED",
+    "joint_count": 20,
+    "joints": [
+      "Root",
+      "Hips",
+      "Spine",
+      "Chest",
+      "Neck",
+      "Head",
+      "Shoulder_L",
+      "UpperArm_L",
+      "LowerArm_L",
+      "Hand_L",
+      "Shoulder_R",
+      "UpperArm_R",
+      "LowerArm_R",
+      "Hand_R",
+      "UpperLeg_L",
+      "LowerLeg_L",
+      "Foot_L",
+      "UpperLeg_R",
+      "LowerLeg_R",
+      "Foot_R"
+    ],
+    "bind_pose": "T",
+    "root_pivot": "ground_between_feet",
+    "units": "meters",
+    "up_axis": "Y",
+    "forward_axis": "-Z",
+    "locked": true
+  },
+  "skin_weight": {
+    "profile": "SurvivorSkinWeight_v1_LOCKED",
+    "max_influences_per_vertex": 2,
+    "normalized": true,
+    "rule": "All survivor variants must preserve the same skeleton and follow this weight profile around hips, shoulders, elbows, knees, neck, and wrists.",
+    "locked": true
+  },
+  "animations": {
+    "set": "SurvivorCoreAnimations_v2_STATE_LOCKED",
+    "locked": true,
+    "clips": [
+      {
+        "name": "idle",
+        "loop": true
+      },
+      {
+        "name": "walk",
+        "loop": true
+      },
+      {
+        "name": "run",
+        "loop": true
+      },
+      {
+        "name": "attack",
+        "loop": false
+      },
+      {
+        "name": "hit",
+        "loop": false
+      },
+      {
+        "name": "death",
+        "loop": false
+      },
+      {
+        "name": "downed_enter",
+        "duration": 0.82,
+        "loop": false,
+        "purpose": "normal_to_single_knee_downed"
+      },
+      {
+        "name": "downed_idle",
+        "duration": 1.6,
+        "loop": true,
+        "purpose": "waiting_for_rescue_single_knee"
+      },
+      {
+        "name": "decision_idle",
+        "duration": 1.8,
+        "loop": true,
+        "purpose": "card_selection_immobile"
+      }
+    ]
+  },
+  "sockets": {
+    "set": "SurvivorSockets_v3_STATE_LOCKED",
+    "locked": true,
+    "count": 8,
+    "rule": "Exact names, parent bones, and local transforms are frozen.",
+    "items": [
+      {
+        "name": "Socket_Hand_L",
+        "parent": "Hand_L",
+        "purpose": "generic hand attachment"
+      },
+      {
+        "name": "Socket_Hand_R",
+        "parent": "Hand_R",
+        "purpose": "generic hand attachment"
+      },
+      {
+        "name": "Socket_Back",
+        "parent": "Chest",
+        "purpose": "back attachment"
+      },
+      {
+        "name": "Socket_Hip_L",
+        "parent": "Hips",
+        "purpose": "left hip attachment"
+      },
+      {
+        "name": "Socket_Hip_R",
+        "parent": "Hips",
+        "purpose": "right hip attachment"
+      },
+      {
+        "name": "Socket_Head",
+        "parent": "Head",
+        "purpose": "helmet/hood/crown/head crystal"
+      },
+      {
+        "name": "Socket_Chest",
+        "parent": "Chest",
+        "purpose": "medic device/magic core/chest crystal"
+      },
+      {
+        "name": "Socket_Status",
+        "parent": "Head",
+        "purpose": "rescue icon/card selection/status icon"
+      }
+    ]
+  },
+  "locked": true,
+  "canonical_version": "4.1",
+  "metadata_family": "Canonical V4",
+  "coordinate_system": {
+    "units": "meters",
+    "up_axis": "Y",
+    "forward_axis": "-Z",
+    "ground_y": 0.0,
+    "root_translation": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "pivot": "ground_between_feet"
+  },
+  "state_material_interface": {
+    "version": "SurvivorStateMaterial_v1_LOCKED",
+    "implementation": "custom material/shader parameters read from glTF material extras",
+    "downed_crystal": {
+      "enabled_parameter": "u_DownedCrystalEnabled",
+      "intensity_parameter": "u_DownedCrystalIntensity",
+      "color_parameter": "u_DownedCrystalColor",
+      "scale_parameter": "u_DownedCrystalScale",
+      "emission_parameter": "u_DownedCrystalEmission",
+      "edge_softness_parameter": "u_DownedCrystalEdgeSoftness",
+      "recommended_color": [
+        0.78,
+        0.9,
+        1.0,
+        1.0
+      ],
+      "blood": false,
+      "gore": false
+    }
+  },
+  "states": {
+    "downed": {
+      "enter_animation": "downed_enter",
+      "idle_animation": "downed_idle",
+      "pose": "single_knee_kneeling_head_lowered",
+      "material_preset": "downed",
+      "hud_socket": "Socket_Status",
+      "must_not_be_supine_corpse": true,
+      "blood_forbidden": true
+    },
+    "decision": {
+      "idle_animation": "decision_idle",
+      "movement_allowed": false,
+      "attack_allowed": false,
+      "pose": "head_lowered_hands_forward_reading_card",
+      "status_socket": "Socket_Status"
+    }
+  }
+}

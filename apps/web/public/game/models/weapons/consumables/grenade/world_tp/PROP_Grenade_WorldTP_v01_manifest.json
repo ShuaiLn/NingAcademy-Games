@@ -1,0 +1,67 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "PROP_Grenade_WorldTP_v01.glb",
+  "asset_id": "PROP_Grenade_WorldTP_v01",
+  "root_node": "PROP_Grenade_WorldTP",
+  "category": "consumable",
+  "variant": "WorldTP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.157,
+    0.13,
+    0.187
+  ],
+  "render": {
+    "mesh_count": 3,
+    "triangle_count": 420,
+    "triangle_budget_max": 3000,
+    "materials": [
+      "MAT_PROP_Grenade",
+      "MAT_PROP_Grenade_Detail",
+      "MAT_PROP_Grenade_Emissive"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Back",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Use"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "special": "independent_timer_light"
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 22728,
+    "nodes": 8,
+    "meshes": 3,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_Prop",
+      "MESH_SafetyRing",
+      "MESH_TimerLight",
+      "SOCKET_Back",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Use",
+      "PROP_Grenade_WorldTP"
+    ],
+    "mesh_primitives": 4,
+    "total_length": 22728
+  }
+}

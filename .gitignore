@@ -21,12 +21,26 @@ coverage/
 playwright-report/
 test-results/
 
+# Vercel
+.vercel/
+
 # Logs
 *.log
 npm-debug.log*
+
+# Local AI / MCP config
+.agents/
+.claude/
+.mcp.json
+AGENTS.md
+CLAUDE.md
+skills-lock.json
 
 # IDE and operating-system files
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
+
+# Certificates
+*.pem

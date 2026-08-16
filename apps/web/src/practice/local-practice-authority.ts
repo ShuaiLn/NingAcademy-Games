@@ -98,11 +98,11 @@ function roleStats(roleId: SurvivorRoleId): {
   readonly weapon: PracticeWeaponState;
 } {
   const roleModifiers: Readonly<Record<SurvivorRoleId, { hp: number; damage: number; magazine: number }>> = {
-    engineer: { hp: 100, damage: 48, magazine: 16 },
-    guardian: { hp: 120, damage: 45, magazine: 12 },
-    medic: { hp: 105, damage: 45, magazine: 12 },
-    psion: { hp: 90, damage: 55, magazine: 12 },
-    vanguard: { hp: 100, damage: 50, magazine: 12 },
+    assassin: { hp: 95, damage: 53, magazine: 12 },
+    guardian: { hp: 110, damage: 46, magazine: 12 },
+    mage: { hp: 95, damage: 51, magazine: 12 },
+    medic: { hp: 100, damage: 48, magazine: 12 },
+    warrior: { hp: 105, damage: 50, magazine: 12 },
   };
   const modifier = roleModifiers[roleId];
 
@@ -149,7 +149,10 @@ function selectRole(state: PracticeState, roleId: SurvivorRoleId): PracticeReduc
         correctCount: 0,
         feedback: null,
         question: roleQuestion(0).publicQuestion,
-        requiredCorrect: requirement.questionCount,
+        questionCount: requirement.questionCount,
+        requiredCorrect: Math.ceil(
+          requirement.questionCount * requirement.minimumFirstAttemptAccuracy,
+        ),
         roleId,
       },
     },
@@ -184,8 +187,25 @@ function submitAnswer(state: PracticeState, answer: string): PracticeReduction {
 function continueFeedback(state: PracticeState): PracticeReduction {
   const roleGate = state.roleGate;
   if (state.phase === "role_gate" && roleGate !== null && roleGate.feedback !== null) {
-    if (roleGate.correctCount >= roleGate.requiredCorrect) {
-      return { state: beginRole(state, roleGate.roleId), events: [] };
+    const answeredCount = roleGate.attemptIndex + 1;
+    if (answeredCount >= roleGate.questionCount) {
+      if (roleGate.correctCount >= roleGate.requiredCorrect) {
+        return { state: beginRole(state, roleGate.roleId), events: [] };
+      }
+
+      return {
+        events: [],
+        state: {
+          ...state,
+          roleGate: {
+            ...roleGate,
+            attemptIndex: 0,
+            correctCount: 0,
+            feedback: null,
+            question: roleQuestion(0).publicQuestion,
+          },
+        },
+      };
     }
 
     const nextAttempt = roleGate.attemptIndex + 1;

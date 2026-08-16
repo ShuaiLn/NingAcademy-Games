@@ -1,0 +1,66 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "PROP_Bandage_WorldTP_v01.glb",
+  "asset_id": "PROP_Bandage_WorldTP_v01",
+  "root_node": "PROP_Bandage_WorldTP",
+  "category": "consumable",
+  "variant": "WorldTP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.156,
+    0.1206,
+    0.156
+  ],
+  "render": {
+    "mesh_count": 3,
+    "triangle_count": 232,
+    "triangle_budget_max": 3000,
+    "materials": [
+      "MAT_PROP_Bandage",
+      "MAT_PROP_Bandage_Detail"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Back",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Use"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "special": "independent_tear_flap"
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 13708,
+    "nodes": 8,
+    "meshes": 3,
+    "materials": 2,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_BandageCore",
+      "MESH_BandageRoll",
+      "MESH_TearFlap",
+      "SOCKET_Back",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Use",
+      "PROP_Bandage_WorldTP"
+    ],
+    "mesh_primitives": 3,
+    "total_length": 13708
+  }
+}

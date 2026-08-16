@@ -1,0 +1,71 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "WPN_Spear_A_FP_v01.glb",
+  "asset_id": "WPN_Spear_A_FP_v01",
+  "root_node": "WPN_Spear_A_FP",
+  "category": "weapon",
+  "variant": "FP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.144,
+    2.13,
+    0.144
+  ],
+  "render": {
+    "mesh_count": 1,
+    "triangle_count": 340,
+    "triangle_budget_max": 15000,
+    "materials": [
+      "MAT_WPN_Spear_A",
+      "MAT_WPN_Spear_A_Detail"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Back",
+    "SOCKET_Blade_End",
+    "SOCKET_Blade_Start",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Sweep_End",
+    "SOCKET_Sweep_Start"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "physical_length_m": 2.13,
+    "sweep_visual_tip_delta_m": 0.0
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 18132,
+    "nodes": 9,
+    "meshes": 1,
+    "materials": 2,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_Weapon",
+      "SOCKET_Back",
+      "SOCKET_Blade_End",
+      "SOCKET_Blade_Start",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Sweep_End",
+      "SOCKET_Sweep_Start",
+      "WPN_Spear_A_FP"
+    ],
+    "mesh_primitives": 2,
+    "total_length": 18132
+  }
+}

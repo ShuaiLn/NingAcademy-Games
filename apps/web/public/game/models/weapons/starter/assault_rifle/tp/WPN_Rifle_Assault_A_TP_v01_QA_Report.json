@@ -1,0 +1,35 @@
+{
+  "asset_id": "WPN_Rifle_Assault_A_TP_v01",
+  "status": "PASS",
+  "production_metrics": {
+    "file_size_bytes": 38720,
+    "dimensions_m_xyz": [
+      0.143,
+      1.1775,
+      0.4809
+    ],
+    "triangles": 452,
+    "meshes": 5,
+    "materials": 2,
+    "skins": 0,
+    "animations": 0
+  },
+  "checks": {
+    "fp_tp_variant_explicit": "PASS",
+    "metric_scale": "PASS",
+    "origin_contract": "PASS",
+    "required_sockets_exported": "PASS",
+    "independent_gameplay_parts": "PASS",
+    "pbr_metallic_roughness": "PASS",
+    "material_count_max_3": "PASS",
+    "triangle_budget": "PASS",
+    "naming_standard": "PASS",
+    "no_camera_or_light": "PASS",
+    "glb_binary_roundtrip": "PASS",
+    "grip_r_present": "PASS",
+    "grip_l_present": "PASS",
+    "muzzle_present": "PASS",
+    "ads_reference_present": "PASS"
+  },
+  "notes": "Prototype/basic production mesh; budgets are upper limits, not density targets."
+}

@@ -8,8 +8,9 @@ untracked code edit.
 
 - The managed game is entered through a NingAcademy one-time ticket. It never
   accepts a Supabase JWT as a second game identity path.
-- Online solo, 2–4 player co-op, assignments, and asymmetric matches use the
-  authoritative server. `LocalAuthority` is unverified personal practice only.
+- Multiplayer supports 2–8 players and uses a Host-authoritative WebRTC star;
+  Host cheating is accepted. Managed solo and unverified personal practice run
+  entirely in the local browser without a room or multiplayer connection.
 - There is no all-player leaderboard. The product shows each player only their
   own current tier, progress, history, and transparent promotion criteria.
 - Survivor and crystal-faction ranks are separate. Crystal rank uses wins plus
@@ -36,9 +37,10 @@ untracked code edit.
   play may pause its game clock; multiplayer freezes only that player's
   decision state.
 - The first survivor profession is unlocked without a question. Selecting an
-  already unlocked non-default profession requires one untimed pre-game
-  question; first-time profession unlocks require progressively more untimed
-  questions. These are separate from timed in-game questions.
+  already unlocked non-default profession requires one correct untimed
+  pre-game question; each first-time non-default unlock requires 10 untimed
+  questions with at least 60% first-answer accuracy. These are separate from
+  timed in-game questions.
 - Assignment question counts do not depend only on personal kills. Fixed Day
   learning nodes or team learning progress ensure every assigned player can
   complete the required number.
@@ -67,7 +69,7 @@ untracked code edit.
   free bodies cannot drain survivor ammunition without cost.
 - The player directly controls a crystal body. Profession abilities may summon
   units; otherwise the system maintains the required mob quota. Summoning has a
-  server-owned cooldown, placement/visibility rules, per-owner quota, and global
+  Host-owned cooldown, placement/visibility rules, per-owner quota, and global
   entity cap.
 - Infection points earned from damage use a per-time cap, repeated-opponent
   decay, and anomaly detection. Healing/infection loops cannot farm rank.
@@ -94,7 +96,7 @@ untracked code edit.
 - Each downed player has an independent rescue timer and lock. A rescuer cannot
   move or attack and is not invulnerable. A wrong rescue answer resets the
   correct streak without dealing damage.
-- On successful rescue, the server chooses a nearby validated navigation point,
+- On successful rescue, the Host chooses a nearby validated navigation point,
   restores 30% HP, gives 3 seconds of non-attacking/no-collision protection,
   and preserves the player's weapons and applied cards.
 - Combat difficulty controls enemies, resources, and total rescue window.
@@ -117,12 +119,12 @@ untracked code edit.
 - Maps are selectable difficulty presets: house is easy, grassland normal,
   desert hard, and hell the highest difficulty. Competitive results always
   record the chosen map and both difficulty axes.
-- Every five hours of continuous play, the server checkpoints the session,
+- Every five hours of continuous play, the Host checkpoints the session,
   shows “休息一下吧，已经玩很久了 / Time for a break”, and forces a clean
-  exit. Authentication, rest lease, reconnect, and server-health clocks never
+  exit. Authentication, rest lease, reconnect, and Host-heartbeat clocks never
   pause for cinematics.
 - Reconnect windows are configurable in the 2–5 minute range. Periodic
-  checkpoints and server-failure recovery prevent losing an entire Day. A
+  checkpoints and Host-migration recovery prevent losing an entire Day. A
   ruleset update must migrate or grant a versioned grace window to live saves.
 
 ## Presentation and accessibility

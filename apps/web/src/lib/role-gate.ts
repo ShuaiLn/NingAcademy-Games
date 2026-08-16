@@ -1,9 +1,9 @@
 export type SurvivorRoleId =
-  | "vanguard"
+  | "warrior"
   | "medic"
-  | "guardian"
-  | "engineer"
-  | "psion";
+  | "mage"
+  | "assassin"
+  | "guardian";
 
 export interface SurvivorRoleDefinition {
   readonly id: SurvivorRoleId;
@@ -17,48 +17,49 @@ export interface SurvivorRoleDefinition {
 
 export const survivorRoles = [
   {
-    id: "vanguard",
-    nameEn: "Vanguard",
-    nameZh: "先锋",
+    id: "warrior",
+    nameEn: "Warrior",
+    nameZh: "战士",
     unlockQuestionCount: 0,
-    summaryEn: "Balanced damage and mobility",
-    summaryZh: "均衡输出与机动",
+    summaryEn: "Balanced frontline damage and durability",
+    summaryZh: "均衡的前线输出与生存能力",
   },
   {
     id: "medic",
     nameEn: "Medic",
     nameZh: "医疗兵",
-    unlockQuestionCount: 2,
+    unlockQuestionCount: 10,
     summaryEn: "Healing and team recovery",
     summaryZh: "治疗与团队恢复",
+  },
+  {
+    id: "mage",
+    nameEn: "Mage",
+    nameZh: "法师",
+    unlockQuestionCount: 10,
+    summaryEn: "Elemental control and area damage",
+    summaryZh: "元素控制与范围伤害",
+  },
+  {
+    id: "assassin",
+    nameEn: "Assassin",
+    nameZh: "刺客",
+    unlockQuestionCount: 10,
+    summaryEn: "Precision damage and high mobility",
+    summaryZh: "精准伤害与高机动性",
   },
   {
     id: "guardian",
     nameEn: "Guardian",
     nameZh: "守卫",
-    unlockQuestionCount: 3,
+    unlockQuestionCount: 10,
     summaryEn: "Protection and threat control",
     summaryZh: "保护与威胁控制",
-  },
-  {
-    id: "engineer",
-    nameEn: "Engineer",
-    nameZh: "工程师",
-    unlockQuestionCount: 4,
-    summaryEn: "Deployables and supplies",
-    summaryZh: "部署物与补给",
-  },
-  {
-    id: "psion",
-    nameEn: "Psion",
-    nameZh: "灵能师",
-    unlockQuestionCount: 5,
-    summaryEn: "Control and elemental effects",
-    summaryZh: "控制与元素效果",
   },
 ] as const satisfies readonly SurvivorRoleDefinition[];
 
 export interface RoleGateRequirement {
+  readonly minimumFirstAttemptAccuracy: number;
   readonly questionCount: number;
   readonly timed: false;
 }
@@ -76,14 +77,14 @@ export function getRoleGateRequirement(
     throw new RangeError(`Unknown survivor role: ${roleId}`);
   }
 
-  if (role.id === "vanguard") {
-    return { questionCount: 0, timed: false };
+  if (role.id === "warrior") {
+    return { minimumFirstAttemptAccuracy: 0, questionCount: 0, timed: false };
   }
 
-  return {
-    // An already unlocked non-default profession still requires one warm-up
-    // question each match. First-time unlocks use the profession's larger gate.
-    questionCount: unlockedRoleIds.has(role.id) ? 1 : role.unlockQuestionCount,
-    timed: false,
-  };
+  // An already unlocked non-default profession requires one correct warm-up
+  // answer. A first unlock is a 10-question batch with >=60% first-answer
+  // accuracy, matching rev2.1 section 4.3.
+  return unlockedRoleIds.has(role.id)
+    ? { minimumFirstAttemptAccuracy: 1, questionCount: 1, timed: false }
+    : { minimumFirstAttemptAccuracy: 0.6, questionCount: role.unlockQuestionCount, timed: false };
 }

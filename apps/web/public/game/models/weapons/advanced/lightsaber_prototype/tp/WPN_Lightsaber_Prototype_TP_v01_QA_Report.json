@@ -1,0 +1,34 @@
+{
+  "asset_id": "WPN_Lightsaber_Prototype_TP_v01",
+  "status": "PASS",
+  "production_metrics": {
+    "file_size_bytes": 15096,
+    "dimensions_m_xyz": [
+      0.11,
+      1.28,
+      0.11
+    ],
+    "triangles": 280,
+    "meshes": 2,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "checks": {
+    "fp_tp_variant_explicit": "PASS",
+    "metric_scale": "PASS",
+    "origin_contract": "PASS",
+    "required_sockets_exported": "PASS",
+    "independent_gameplay_parts": "PASS",
+    "pbr_metallic_roughness": "PASS",
+    "material_count_max_3": "PASS",
+    "triangle_budget": "PASS",
+    "naming_standard": "PASS",
+    "no_camera_or_light": "PASS",
+    "glb_binary_roundtrip": "PASS",
+    "grip_r_present": "PASS",
+    "grip_l_present": "PASS",
+    "melee_sweep_aligned": "PASS"
+  },
+  "notes": "Prototype/basic production mesh; budgets are upper limits, not density targets."
+}

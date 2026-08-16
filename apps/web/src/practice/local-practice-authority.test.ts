@@ -41,24 +41,27 @@ function killEnemy(state: PracticeState): PracticeState {
 }
 
 describe("LocalPracticeAuthority reducer", () => {
-  it("starts Vanguard freely but gates another role with untimed local mock questions", () => {
-    const vanguard = command(createInitialPracticeState(), {
+  it("starts Warrior freely but gates another role with ten untimed local mock questions", () => {
+    const warrior = command(createInitialPracticeState(), {
       type: "role.select",
-      roleId: "vanguard",
+      roleId: "warrior",
     });
-    expect(vanguard.phase).toBe("playing");
+    expect(warrior.phase).toBe("playing");
 
     let medic = command(createInitialPracticeState(), { type: "role.select", roleId: "medic" });
     expect(medic.phase).toBe("role_gate");
-    expect(medic.roleGate?.requiredCorrect).toBe(2);
+    expect(medic.roleGate).toMatchObject({ questionCount: 10, requiredCorrect: 6 });
     expect(medic.roleGate?.question).not.toHaveProperty("correctAnswer");
 
-    for (let index = 0; index < 2; index += 1) {
-      const mock = LOCAL_ROLE_GATE_QUESTIONS[index];
+    for (let index = 0; index < 10; index += 1) {
+      const mock = LOCAL_ROLE_GATE_QUESTIONS[index % LOCAL_ROLE_GATE_QUESTIONS.length];
       if (mock === undefined) {
         throw new Error("Missing local mock fixture");
       }
-      medic = command(medic, { type: "answer.submit", answer: mock.correctAnswer });
+      medic = command(medic, {
+        type: "answer.submit",
+        answer: index < 6 ? mock.correctAnswer : "definitely-wrong",
+      });
       medic = command(medic, { type: "feedback.continue" });
     }
     expect(medic.phase).toBe("playing");
@@ -66,7 +69,7 @@ describe("LocalPracticeAuthority reducer", () => {
   });
 
   it("moves the Thrall, applies hitscan damage, kills it, and respawns it", () => {
-    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "vanguard" });
+    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "warrior" });
     const startZ = state.enemy.position.z;
     state = step(state, 50);
     expect(state.enemy.position.z).toBeLessThan(startZ);
@@ -84,7 +87,7 @@ describe("LocalPracticeAuthority reducer", () => {
   });
 
   it("pauses on kill ten and applies the selected card only after a correct timed answer", () => {
-    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "vanguard" });
+    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "warrior" });
     for (let kill = 0; kill < 10; kill += 1) {
       state = killEnemy(state);
       if (kill < 9) {
@@ -104,7 +107,7 @@ describe("LocalPracticeAuthority reducer", () => {
   });
 
   it("shows timeout feedback and applies ten true damage without killing the player", () => {
-    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "vanguard" });
+    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "warrior" });
     // Use a focused fixture state to test the card timeout without ten visual kills.
     state = {
       ...state,
@@ -119,12 +122,12 @@ describe("LocalPracticeAuthority reducer", () => {
 
     expect(state.phase).toBe("card_feedback");
     expect(state.cardQuestion?.feedback).toMatchObject({ correct: false, timedOut: true });
-    expect(state.player.hp).toBe(90);
+    expect(state.player.hp).toBe(95);
     expect(state.player.alive).toBe(true);
   });
 
   it("freezes combat during the timed card question", () => {
-    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "vanguard" });
+    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "warrior" });
     state = {
       ...state,
       kills: 10,
@@ -142,7 +145,7 @@ describe("LocalPracticeAuthority reducer", () => {
   });
 
   it("never lets a wrong card answer's true damage reduce HP below one", () => {
-    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "vanguard" });
+    let state = command(createInitialPracticeState(), { type: "role.select", roleId: "warrior" });
     state = {
       ...state,
       kills: 10,

@@ -12,7 +12,7 @@ export function RoleSelection({ onSelect }: RoleSelectionProps): React.JSX.Eleme
       <div className="section-heading">
         <p className="eyebrow">STEP 1 // LOCAL ROLE GATE</p>
         <h2 id="role-select-title">选择幸存者职业</h2>
-        <p>先锋首次免费；其他职业需完成无时限本地模拟题。答案保存在浏览器内，不代表生产判题安全。</p>
+        <p>战士首次免费；其他职业需完成无时限本地模拟题。答案保存在浏览器内，不代表生产判题安全。</p>
       </div>
       <div className="role-grid">
         {survivorRoles.map((role) => {

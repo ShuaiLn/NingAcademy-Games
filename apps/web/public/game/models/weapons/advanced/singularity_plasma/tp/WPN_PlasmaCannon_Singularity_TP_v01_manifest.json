@@ -1,0 +1,73 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "WPN_PlasmaCannon_Singularity_TP_v01.glb",
+  "asset_id": "WPN_PlasmaCannon_Singularity_TP_v01",
+  "root_node": "WPN_PlasmaCannon_Singularity_TP",
+  "category": "weapon",
+  "variant": "TP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.252,
+    1.105,
+    0.4502
+  ],
+  "render": {
+    "mesh_count": 4,
+    "triangle_count": 456,
+    "triangle_budget_max": 3000,
+    "materials": [
+      "MAT_WPN_PlasmaCannon_Singularity",
+      "MAT_WPN_PlasmaCannon_Singularity_Detail",
+      "MAT_WPN_PlasmaCannon_Singularity_Emissive"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_ADS",
+    "SOCKET_Back",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Muzzle"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "family": "plasma",
+    "stage": 2,
+    "special": "dual_counter_rotating_rings",
+    "ability_vfx_baked": false
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 29720,
+    "nodes": 10,
+    "meshes": 4,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_AcceleratorRing_A",
+      "MESH_AcceleratorRing_B",
+      "MESH_EnergyCell",
+      "MESH_Weapon",
+      "SOCKET_ADS",
+      "SOCKET_Back",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Muzzle",
+      "WPN_PlasmaCannon_Singularity_TP"
+    ],
+    "mesh_primitives": 5,
+    "total_length": 29720
+  }
+}

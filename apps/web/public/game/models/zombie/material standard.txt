@@ -1,0 +1,37 @@
+Material System:
+PBR Metallic-Roughness
+
+Allowed textures:
+BaseColor
+Normal
+MetallicRoughness
+Emissive
+
+Texture format:
+PNG / JPG
+
+Texture size:
+Normal character: 1024x1024
+Boss: max 2048x2048
+Attachment: 512x512 or 1024x1024
+
+Normal map:
+OpenGL/glTF compatible
+
+Maximum materials:
+Normal Survivor: 3
+Normal Enemy: 2
+Boss: 5
+
+Transparency:
+Only when necessary
+
+Emissive:
+Only for magic, energy, crystal, medical effects
+
+No:
+Custom Blender shaders
+Procedural nodes that cannot export to GLB
+Unnecessary transparent materials
+Duplicate materials
+Unused materials

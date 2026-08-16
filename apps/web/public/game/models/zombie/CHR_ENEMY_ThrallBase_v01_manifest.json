@@ -1,0 +1,364 @@
+{
+  "asset": "CHR_ENEMY_ThrallBase_v01.glb",
+  "displayName": "结晶体 / Thrall (base)",
+  "canonical_source": "CHR_ENEMY_ZombieBase_v04.glb",
+  "canonical_standard": "EnemyCanonical_v2_LOCKED",
+  "operation": "Mesh replacement / derivative on a locked canonical rig",
+  "naming_standard": "NingAcademy Games Naming Standard v1.0",
+  "skeleton_changed": false,
+  "bone_count": 18,
+  "bone_names_match": true,
+  "bone_hierarchy_match": true,
+  "rest_pose_match": true,
+  "inverse_bind_matrices_match": true,
+  "new_bones_added": 0,
+  "animation_count": 12,
+  "animations_compatible": true,
+  "animation_data_bit_identical": true,
+  "animation_names": [
+    "ANIM_Idle_01",
+    "ANIM_Idle_02",
+    "ANIM_Walk",
+    "ANIM_Run",
+    "ANIM_Attack_01",
+    "ANIM_Attack_02",
+    "ANIM_Hit_Front",
+    "ANIM_Hit_Back",
+    "ANIM_Death_01",
+    "ANIM_Death_02",
+    "ANIM_Spawn",
+    "ANIM_Stagger"
+  ],
+  "socket_validation": "PASS",
+  "socket_transforms_unchanged": "PASS",
+  "sockets_original": 9,
+  "sockets_added": 8,
+  "shard_emitters_are_joints": false,
+  "collision_validation": "PASS",
+  "collision_note": "COL_Body capsule r=0.34 h=1.72 unchanged - the thinner Thrall body still fits, and decorative crystal spikes are deliberately excluded from body collision",
+  "hurtbox_validation": "PASS",
+  "hitbox_validation": "PASS",
+  "materials": 2,
+  "material_names": [
+    "MAT_ENEMY_Body",
+    "MAT_ENEMY_Crystal"
+  ],
+  "triangles": 4379,
+  "vertices": 3891,
+  "triangle_budget": {
+    "hard_limit": 4500,
+    "actual_total": 4379,
+    "body_head_clothes_skin": 3771,
+    "body_head_clothes_recommended": "3000-3600",
+    "grown_crystal": 408,
+    "grown_crystal_recommended": "300-500",
+    "core_plus_shell": 200,
+    "core_plus_shell_recommended": "200-400",
+    "deviation_note": "skin group is 3771 vs the recommended 3000-3600. The canonical v04 retopology is already 3792 tris and clause 14 forbids damaging joint deformation topology, so it was kept intact; the hard limit of 4500 passes with margin."
+  },
+  "per_mesh": {
+    "MESH_Body": {
+      "triangles": 2872,
+      "vertices": 2464,
+      "primitives": [
+        {
+          "material": "MAT_ENEMY_Body",
+          "triangles": 2512,
+          "vertices": 1384
+        },
+        {
+          "material": "MAT_ENEMY_Crystal",
+          "triangles": 360,
+          "vertices": 1080
+        }
+      ]
+    },
+    "MESH_Head": {
+      "triangles": 576,
+      "vertices": 422,
+      "primitives": [
+        {
+          "material": "MAT_ENEMY_Body",
+          "triangles": 528,
+          "vertices": 278
+        },
+        {
+          "material": "MAT_ENEMY_Crystal",
+          "triangles": 48,
+          "vertices": 144
+        }
+      ]
+    },
+    "MESH_Clothes": {
+      "triangles": 731,
+      "vertices": 405,
+      "primitives": [
+        {
+          "material": "MAT_ENEMY_Body",
+          "triangles": 731,
+          "vertices": 405
+        }
+      ]
+    },
+    "MESH_Core": {
+      "triangles": 80,
+      "vertices": 240,
+      "primitives": [
+        {
+          "material": "MAT_ENEMY_Crystal",
+          "triangles": 80,
+          "vertices": 240
+        }
+      ]
+    },
+    "MESH_CoreShell": {
+      "triangles": 120,
+      "vertices": 360,
+      "primitives": [
+        {
+          "material": "MAT_ENEMY_Crystal",
+          "triangles": 120,
+          "vertices": 360
+        }
+      ]
+    }
+  },
+  "max_skin_influences": 2,
+  "weight_normalization": "PASS",
+  "max_weight_sum_error": 3e-08,
+  "unweighted_vertices": 0,
+  "uv0": "PASS",
+  "uv0_in_range": "PASS",
+  "uv_wrap_triangles": 0,
+  "uv_stretch_ratio_p99": 3.312,
+  "normals": "PASS",
+  "degenerate_triangles": 0,
+  "nonmanifold_edges": 0,
+  "nonpositive_closed_components": 0,
+  "textures": [
+    {
+      "name": "T_ThrallBase_BaseColor",
+      "mime": "image/jpeg",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "name": "T_ThrallBase_MetallicRoughness",
+      "mime": "image/png",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "name": "T_ThrallBase_Normal",
+      "mime": "image/png",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "name": "T_ThrallCrystal_BaseColor",
+      "mime": "image/jpeg",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "name": "T_ThrallCrystal_MetallicRoughness",
+      "mime": "image/png",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "name": "T_ThrallCrystal_Emissive",
+      "mime": "image/png",
+      "size": [
+        1024,
+        1024
+      ]
+    }
+  ],
+  "texture_resolution": "1024x1024",
+  "textures_embedded": true,
+  "textures_regenerated": true,
+  "uv_repacked": "body/head atlas A and clothes atlas B merged into one 1024 atlas so the whole body runs on a single material",
+  "uv_seam_defect_repaired": "v04 contained cylindrical wrap triangles spanning u 0.96->0.00; 133 vertices were split so no triangle crosses the atlas",
+  "scale": "PASS",
+  "pivot": "PASS",
+  "forward": "-Z",
+  "up": "+Y",
+  "units": "meters",
+  "weakpoint": {
+    "core_mesh": "MESH_Core",
+    "shell_mesh": "MESH_CoreShell",
+    "aligned_socket": "SOCKET_Chest",
+    "core_socket_lock_error_m": 0.0,
+    "runtime": [
+      "damage MESH_CoreShell",
+      "setEnabled(false)/dispose MESH_CoreShell",
+      "MESH_Core is then fully exposed and emissive"
+    ],
+    "gameplay_hitbox": "created at runtime from SOCKET_Chest; existing HURT_* set untouched"
+  },
+  "death_dissolve": {
+    "shard_emitters": [
+      "SOCKET_Shard_00",
+      "SOCKET_Shard_01",
+      "SOCKET_Shard_02",
+      "SOCKET_Shard_03",
+      "SOCKET_Shard_04",
+      "SOCKET_Shard_05",
+      "SOCKET_Shard_06",
+      "SOCKET_Shard_07"
+    ],
+    "target_fragments": "10-20",
+    "note": "no long hanging geometry - clothes are short and crystals are stubby so the mesh can be swapped for fragments cleanly"
+  },
+  "biome_strategy": {
+    "mode": "one base character + 4 lightweight attachment sets + material factor tint",
+    "duplicated_full_characters": 0,
+    "attachment_sets": {
+      "House": {
+        "file": "ATT_House_Thrall_A_v01.glb",
+        "triangles": 630,
+        "parts": 7,
+        "materials": 1,
+        "texture": "512x512",
+        "bytes": 222544,
+        "silhouette": "short thick hexagonal prisms, dense cluster, straight sharp cracks"
+      },
+      "Grass": {
+        "file": "ATT_Grass_Thrall_A_v01.glb",
+        "triangles": 686,
+        "parts": 7,
+        "materials": 1,
+        "texture": "512x512",
+        "bytes": 226776,
+        "silhouette": "rounded spore caps plus a few short filaments, vein-like cracks"
+      },
+      "Desert": {
+        "file": "ATT_Desert_Thrall_A_v01.glb",
+        "triangles": 420,
+        "parts": 7,
+        "materials": 1,
+        "texture": "512x512",
+        "bytes": 171356,
+        "silhouette": "flat weathered plates fanning outward, rounded edges, grainy"
+      },
+      "Hell": {
+        "file": "ATT_Hell_Thrall_A_v01.glb",
+        "triangles": 420,
+        "parts": 7,
+        "materials": 1,
+        "texture": "512x512",
+        "bytes": 180544,
+        "silhouette": "obsidian body with orange ember veins, long sharp spikes"
+      }
+    },
+    "tint_parameters": {
+      "House": {
+        "crystalBaseColorFactor": [
+          0.545,
+          0.361,
+          0.965,
+          1.0
+        ],
+        "crystalEmissiveFactor": [
+          0.545,
+          0.361,
+          0.965
+        ],
+        "bodyBaseColorFactor": [
+          0.92,
+          0.88,
+          0.98,
+          1.0
+        ]
+      },
+      "Grass": {
+        "crystalBaseColorFactor": [
+          0.29,
+          0.871,
+          0.502,
+          1.0
+        ],
+        "crystalEmissiveFactor": [
+          0.29,
+          0.871,
+          0.502
+        ],
+        "bodyBaseColorFactor": [
+          0.88,
+          0.95,
+          0.88,
+          1.0
+        ]
+      },
+      "Desert": {
+        "crystalBaseColorFactor": [
+          0.91,
+          0.769,
+          0.408,
+          1.0
+        ],
+        "crystalEmissiveFactor": [
+          0.91,
+          0.769,
+          0.408
+        ],
+        "bodyBaseColorFactor": [
+          0.99,
+          0.96,
+          0.88,
+          1.0
+        ]
+      },
+      "Hell": {
+        "crystalBaseColorFactor": [
+          0.11,
+          0.098,
+          0.09,
+          1.0
+        ],
+        "crystalEmissiveFactor": [
+          1.0,
+          0.478,
+          0.102
+        ],
+        "bodyBaseColorFactor": [
+          0.88,
+          0.83,
+          0.82,
+          1.0
+        ]
+      }
+    }
+  },
+  "contains": {
+    "weapon_mesh": false,
+    "projectile": false,
+    "vfx": false,
+    "gore": false,
+    "blood": false,
+    "crystal_mesh": true
+  },
+  "babylon_ready": true,
+  "file_size": {
+    "source_bytes": 2998892,
+    "output_bytes": 2315596
+  },
+  "notes": [
+    "No new skeleton, no re-rig, no Mixamo, no auto-rig. The 18-joint SKEL_Enemy, its rest pose and its inverse bind matrices are byte-compatible with v04.",
+    "All 12 animation clips were copied with bit-identical sampler data and were replayed against the new mesh during QA.",
+    "Every silhouette change (hunch, thinner body, longer-looking arms, asymmetric shoulders) is a continuous deformation field on the REST mesh. No bone was moved.",
+    "Crystal shards inherit the exact skin binding of the flesh they grow from, and their anchors are chosen for local weight homogeneity so roots cannot tear out at joints.",
+    "The segmented spine bend keeps the skull near the neck bone axis: worst edge stretch is 2.248 vs 2.479 in the canonical master, i.e. deformation quality is better than the source."
+  ]
+}

@@ -40,11 +40,18 @@ function sourceFiles(directoryUrl) {
   return result;
 }
 
+function stripCommentsAndLiterals(contents) {
+  return contents
+    .replace(/\/\*[\s\S]*?\*\//gu, " ")
+    .replace(/\/\/[^\r\n]*/gu, " ")
+    .replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/gu, " ");
+}
+
 function rejectPatterns(directory, patterns) {
   for (const file of sourceFiles(new URL(directory, repositoryRoot))) {
     const contents = readFileSync(file, "utf8");
-    for (const [pattern, message] of patterns) {
-      if (pattern.test(contents)) {
+    for (const [pattern, message, codeOnly = false] of patterns) {
+      if (pattern.test(codeOnly ? stripCommentsAndLiterals(contents) : contents)) {
         violations.push(`${relative(process.cwd(), file)}: ${message}`);
       }
     }
@@ -58,8 +65,8 @@ rejectPatterns("apps/web/src/", [
 ]);
 
 rejectPatterns("packages/game-core/src/", [
-  [/from\s+["'](?:react|next|@babylonjs\/|@colyseus\/|colyseus)/u, "pure game core imports a framework"],
-  [/\b(?:document|window|HTMLElement|WebGLRenderingContext)\b/u, "pure game core references a browser global"],
+  [/from\s+["'](?:react|next|@babylonjs\/)/u, "pure game core imports a framework"],
+  [/\b(?:document|window|HTMLElement|WebGLRenderingContext)\b/u, "pure game core references a browser global", true],
 ]);
 
 if (violations.length > 0) {

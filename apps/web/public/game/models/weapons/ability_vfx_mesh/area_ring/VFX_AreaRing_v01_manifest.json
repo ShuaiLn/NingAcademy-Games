@@ -1,0 +1,59 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "VFX_AreaRing_v01.glb",
+  "asset_id": "VFX_AreaRing_v01",
+  "root_node": "VFX_AreaRing",
+  "category": "vfx",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    2.07,
+    2.07,
+    0.0666
+  ],
+  "render": {
+    "mesh_count": 1,
+    "triangle_count": 320,
+    "triangle_budget_max": 5000,
+    "materials": [
+      "MAT_VFX_AreaRing"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "shared_users": [
+      "MedicHealPulse",
+      "MageFrostField",
+      "WarriorWarCry"
+    ],
+    "material_swap_only": true
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 10064,
+    "nodes": 2,
+    "meshes": 1,
+    "materials": 1,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_AreaRing",
+      "VFX_AreaRing"
+    ],
+    "mesh_primitives": 1,
+    "total_length": 10064
+  }
+}

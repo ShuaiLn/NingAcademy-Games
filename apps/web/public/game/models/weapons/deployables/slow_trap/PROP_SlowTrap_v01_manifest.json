@@ -1,0 +1,71 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "PROP_SlowTrap_v01.glb",
+  "asset_id": "PROP_SlowTrap_v01",
+  "root_node": "PROP_SlowTrap",
+  "category": "deployable",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    0.6,
+    0.6,
+    0.22
+  ],
+  "render": {
+    "mesh_count": 5,
+    "triangle_count": 248,
+    "triangle_budget_max": 3500,
+    "materials": [
+      "MAT_PROP_SlowTrap",
+      "MAT_PROP_SlowTrap_Emissive",
+      "MAT_PROP_SlowTrap_Detail"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Field",
+    "SOCKET_Placement"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "placement_preview": "material_state",
+    "animation_states": [
+      "Idle",
+      "Trigger",
+      "Active"
+    ],
+    "probes_independent": true
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 20536,
+    "nodes": 8,
+    "meshes": 5,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_Probe_01",
+      "MESH_Probe_02",
+      "MESH_Probe_03",
+      "MESH_Probe_04",
+      "MESH_TrapBase",
+      "SOCKET_Field",
+      "SOCKET_Placement",
+      "PROP_SlowTrap"
+    ],
+    "mesh_primitives": 6,
+    "total_length": 20536
+  }
+}

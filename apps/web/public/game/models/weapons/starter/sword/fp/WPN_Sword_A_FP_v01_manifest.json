@@ -1,0 +1,74 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "WPN_Sword_A_FP_v01.glb",
+  "asset_id": "WPN_Sword_A_FP_v01",
+  "root_node": "WPN_Sword_A_FP",
+  "category": "weapon",
+  "variant": "FP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.32,
+    1.305,
+    0.1
+  ],
+  "render": {
+    "mesh_count": 3,
+    "triangle_count": 536,
+    "triangle_budget_max": 15000,
+    "materials": [
+      "MAT_WPN_Sword_A",
+      "MAT_WPN_Sword_A_Detail",
+      "MAT_WPN_Sword_A_BladeEdge"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Back",
+    "SOCKET_Blade_End",
+    "SOCKET_Blade_Start",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Sweep_End",
+    "SOCKET_Sweep_Start"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "blade_length_m": 0.955,
+    "sweep_visual_tip_delta_m": 0.0
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 32236,
+    "nodes": 11,
+    "meshes": 3,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_Blade",
+      "MESH_BladeEdge",
+      "MESH_Hilt",
+      "SOCKET_Back",
+      "SOCKET_Blade_End",
+      "SOCKET_Blade_Start",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Sweep_End",
+      "SOCKET_Sweep_Start",
+      "WPN_Sword_A_FP"
+    ],
+    "mesh_primitives": 4,
+    "total_length": 32236
+  }
+}

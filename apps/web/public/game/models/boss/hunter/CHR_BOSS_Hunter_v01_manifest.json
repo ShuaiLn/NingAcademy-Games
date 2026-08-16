@@ -1,0 +1,173 @@
+{
+  "standard": "NingAcademy Games Boss Asset Naming Standard v1.0",
+  "file": "CHR_BOSS_Hunter_v01.glb",
+  "asset_id": "CHR_BOSS_Hunter_v01",
+  "boss_id": "hunter",
+  "version": "v01",
+  "source_file": "Hunter.glb",
+  "self_contained": true,
+  "controllers": [
+    "AIController",
+    "PlayerController"
+  ],
+  "biome_bound": false,
+  "affix_logic_in_glb": false,
+  "root_motion": false,
+  "dimensions_m": [
+    2.452,
+    1.988,
+    4.002
+  ],
+  "render": {
+    "mesh_count": 6,
+    "triangle_count": 13737,
+    "materials": [
+      "MAT_BOSS_Hunter_Armor",
+      "MAT_BOSS_Hunter_Body",
+      "MAT_BOSS_Hunter_Organ"
+    ],
+    "texture_resolution": "1024x1024",
+    "texture_profile": "Mobile 1K"
+  },
+  "skeleton": {
+    "name": "SKEL_BOSS_Hunter",
+    "bones": 44,
+    "skins": 1,
+    "max_vertex_influences": 3
+  },
+  "animations": [
+    "idle",
+    "walk",
+    "run",
+    "attack_primary",
+    "ability_cast",
+    "hit",
+    "death",
+    "phase_change",
+    "shield_phase",
+    "stagger",
+    "break_react",
+    "ultimate",
+    "summon",
+    "leap",
+    "airborne",
+    "land",
+    "attack_claw_L",
+    "attack_claw_R",
+    "turn_180"
+  ],
+  "animation_interface_required": [
+    "idle",
+    "walk",
+    "run",
+    "attack_primary",
+    "ability_cast",
+    "hit",
+    "death",
+    "phase_change",
+    "shield_phase",
+    "stagger",
+    "break_react",
+    "ultimate",
+    "summon"
+  ],
+  "breakables": [
+    "BRK_BackBlade_L",
+    "BRK_BackBlade_R",
+    "BRK_ChestCoreShell"
+  ],
+  "weakpoint": {
+    "id": "ChestCore",
+    "meshes": [
+      "MESH_BOSS_Hunter_Weakpoint_Chest"
+    ],
+    "hitbox": "HIT_Weakpoint"
+  },
+  "technical_nodes": {
+    "representation": "GLTF_EMPTY_WITH_EXTRAS",
+    "renderable": false,
+    "collision": [
+      "COL_Body"
+    ],
+    "hitboxes": [
+      "HIT_Head",
+      "HIT_Torso",
+      "HIT_Pelvis",
+      "HIT_Arm_L",
+      "HIT_Arm_R",
+      "HIT_Leg_L",
+      "HIT_Leg_R",
+      "HIT_Weakpoint"
+    ],
+    "extras_contract": [
+      "runtime_component",
+      "collision_only",
+      "renderable",
+      "shape",
+      "local_dimensions",
+      "half_extents",
+      "radius",
+      "height",
+      "parent_bone"
+    ]
+  },
+  "sockets": [
+    "SOCKET_Camera",
+    "SOCKET_Aim",
+    "SOCKET_Hand_L",
+    "SOCKET_Hand_R",
+    "SOCKET_Ability",
+    "SOCKET_GroundFX",
+    "SOCKET_CoreFX",
+    "SOCKET_ShieldFX",
+    "SOCKET_LeapFX",
+    "SOCKET_MarkFX",
+    "SOCKET_Claw_L",
+    "SOCKET_Claw_R"
+  ],
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "nodes": 73,
+    "meshes": 6,
+    "skins": 1,
+    "materials": 3,
+    "images": 3,
+    "animations": 19,
+    "animation_names": [
+      "ability_cast",
+      "airborne",
+      "attack_claw_L",
+      "attack_claw_R",
+      "attack_primary",
+      "break_react",
+      "death",
+      "hit",
+      "idle",
+      "land",
+      "leap",
+      "phase_change",
+      "run",
+      "shield_phase",
+      "stagger",
+      "summon",
+      "turn_180",
+      "ultimate",
+      "walk"
+    ],
+    "triangles": 13737,
+    "technical_nodes": [
+      "HIT_Weakpoint",
+      "HIT_Arm_L",
+      "HIT_Arm_R",
+      "HIT_Head",
+      "HIT_Torso",
+      "HIT_Leg_L",
+      "HIT_Leg_R",
+      "HIT_Pelvis",
+      "COL_Body"
+    ],
+    "technical_nodes_with_mesh": 0,
+    "white_collision_geometry_removed": true,
+    "file_size_bytes": 4743440
+  }
+}

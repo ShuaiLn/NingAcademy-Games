@@ -1,0 +1,64 @@
+{
+  "asset_id": "CHR_BOSS_Swarm_v01",
+  "status": "PASS_WITH_KNOWN_SOURCE_TOPOLOGY_WARNING",
+  "source_audit": {
+    "source": "Swarm.glb",
+    "source_type": "single_static_generated_mesh",
+    "source_triangles": 50000,
+    "source_skeleton": false,
+    "source_skin": false,
+    "source_animations": 0
+  },
+  "production_metrics": {
+    "file_size_bytes": 4128280,
+    "dimensions_m": [
+      2.354,
+      2.024,
+      4.102
+    ],
+    "triangles": 14052,
+    "bones": 43,
+    "max_vertex_influences": 3,
+    "materials": 3,
+    "images": 3,
+    "animations": 15,
+    "body_non_manifold_edges": 11681
+  },
+  "checks": {
+    "independent_root_skeleton_and_skin": "PASS",
+    "render_triangles_12k_to_20k": "PASS",
+    "hard_triangle_limit_25k": "PASS",
+    "bones_40_to_70": "PASS",
+    "max_four_vertex_influences": "PASS",
+    "one_to_three_materials": "PASS",
+    "mobile_1k_texture_profile": "PASS",
+    "real_breakable_meshes": "PASS",
+    "visible_weakpoint_mesh": "PASS",
+    "hitbox_and_collision_nodes_are_empty": "PASS",
+    "required_affix_sockets": "PASS",
+    "required_animation_interfaces": "PASS",
+    "root_motion_disabled": "PASS",
+    "ai_and_player_controller_contract": "PASS",
+    "affix_logic_not_embedded": "PASS",
+    "no_camera_or_light": "PASS",
+    "glb_binary_roundtrip": "PASS"
+  },
+  "role_specific_pose_tests": {
+    "summon_prepare": "PASS_INTERFACE_AND_POSE_AUTHORED",
+    "arms_spread": "PASS_INTERFACE_AND_POSE_AUTHORED",
+    "hive_open": "PASS_INTERFACE_AND_POSE_AUTHORED",
+    "back_extension": "PASS_INTERFACE_AND_POSE_AUTHORED",
+    "body_arch_back": "PASS_INTERFACE_AND_POSE_AUTHORED",
+    "body_lean_forward": "PASS_INTERFACE_AND_POSE_AUTHORED",
+    "ground_slam": "PASS_INTERFACE_AND_POSE_AUTHORED",
+    "hit_react": "PASS_INTERFACE_AND_POSE_AUTHORED",
+    "arms_spread_hive_clearance": "PASS_INTERFACE_AND_POSE_AUTHORED"
+  },
+  "technical_geometry_fix": {
+    "status": "PASS",
+    "implementation": "COL_Body and HIT_* are Empty nodes with glTF extras; no collision Mesh is exported.",
+    "technical_nodes_present": 9,
+    "technical_meshes_present": 0
+  },
+  "known_warning": "The supplied generative source remains triangle-only and non-manifold after production decimation. Primitive collision is mandatory; render meshes must not be used as mesh collision, subdivision, cloth, or fracture simulation."
+}

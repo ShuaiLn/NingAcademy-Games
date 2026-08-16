@@ -1,0 +1,63 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "PROP_ShieldGenerator_v01.glb",
+  "asset_id": "PROP_ShieldGenerator_v01",
+  "root_node": "PROP_ShieldGenerator",
+  "category": "deployable",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    0.48,
+    0.48,
+    0.5917
+  ],
+  "render": {
+    "mesh_count": 2,
+    "triangle_count": 380,
+    "triangle_budget_max": 3500,
+    "materials": [
+      "MAT_PROP_ShieldGenerator",
+      "MAT_PROP_ShieldGenerator_Detail",
+      "MAT_PROP_ShieldGenerator_Emissive"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Placement",
+    "SOCKET_ShieldDome"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "placement_preview": "material_state",
+    "shield_dome_is_separate_asset": true
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 19188,
+    "nodes": 5,
+    "meshes": 2,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_EnergyRing",
+      "MESH_GeneratorBase",
+      "SOCKET_Placement",
+      "SOCKET_ShieldDome",
+      "PROP_ShieldGenerator"
+    ],
+    "mesh_primitives": 4,
+    "total_length": 19188
+  }
+}

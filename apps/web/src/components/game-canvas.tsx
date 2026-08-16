@@ -77,7 +77,7 @@ export function GameCanvas(): React.JSX.Element {
           feedback={state.roleGate.feedback}
           onContinue={() => authority.dispatch({ type: "feedback.continue" })}
           onSubmit={(answer) => authority.dispatch({ type: "answer.submit", answer })}
-          progressLabel={`${state.roleGate.correctCount}/${state.roleGate.requiredCorrect} 正确`}
+          progressLabel={`${state.roleGate.attemptIndex + 1}/${state.roleGate.questionCount} 题 · ${state.roleGate.correctCount}/${state.roleGate.requiredCorrect} 正确`}
           question={state.roleGate.question}
           title="职业解锁模拟题 / Role gate"
         />
@@ -89,7 +89,7 @@ export function GameCanvas(): React.JSX.Element {
     <section aria-labelledby="practice-title" className="game-shell practice-shell">
       <div className="practice-warning" role="status">
         <strong>UNVERIFIED LocalAuthority</strong>
-        <span>本地成绩不保存、不进入作业、不改变个人段位；无 Supabase 或 Colyseus 连接。</span>
+        <span>本地成绩不保存、不进入作业、不改变个人段位；不创建 Supabase 房间或 WebRTC 连接。</span>
       </div>
 
       <div className="combat-hud" aria-live="polite">

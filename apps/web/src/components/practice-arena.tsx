@@ -1,7 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import type { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
+import type { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 
+import {
+  ASSAULT_RIFLE_FP,
+  HOUSE_SHARD_PACK,
+  THRALL_BIOME_ATTACHMENTS,
+  THRALL_MODEL,
+  type AnimationSemantic,
+} from "@/game-assets/model-asset-registry";
+import {
+  applyThrallBiomeMaterials,
+  loadModelAsset,
+  type LoadedModelAsset,
+} from "@/game-assets/model-runtime";
 import { supportsWebGl2 } from "@/lib/browser-capabilities";
 import type { EffectsPreferences } from "@/lib/effects-preferences";
 import { FlashGovernor } from "@/lib/flash-governor";
@@ -15,6 +30,13 @@ export interface PracticeArenaProps {
 }
 
 type ArenaStatus = "starting" | "ready" | "unsupported" | "failed";
+type AssetStatus = "loading" | "ready" | "fallback";
+
+interface PooledShard {
+  lifetimeMs: number;
+  mesh: AbstractMesh;
+  velocity: Vector3;
+}
 
 const deathCue = crystalDeathCues[0];
 
@@ -23,6 +45,7 @@ export function PracticeArena({ authority, effects, state }: PracticeArenaProps)
   const effectsRef = useRef(effects);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [status, setStatus] = useState<ArenaStatus>("starting");
+  const [assetStatus, setAssetStatus] = useState<AssetStatus>("loading");
 
   effectsRef.current = effects;
 
@@ -145,7 +168,7 @@ export function PracticeArena({ authority, effects, state }: PracticeArenaProps)
       const shardMaterial = new StandardMaterial("pooled-shard-material", scene);
       shardMaterial.diffuseColor = new Color3(0.34, 0.2, 0.74);
       shardMaterial.emissiveColor = new Color3(0.08, 0.035, 0.23);
-      const shardStates = Array.from({ length: 12 }, (_, index) => {
+      const shardStates: PooledShard[] = Array.from({ length: 12 }, (_, index) => {
         const mesh = MeshBuilder.CreatePolyhedron(
           `pooled-shard-${index}`,
           { size: 0.18 + (index % 3) * 0.04, type: index % 2 === 0 ? 1 : 2 },
@@ -156,13 +179,139 @@ export function PracticeArena({ authority, effects, state }: PracticeArenaProps)
         return { lifetimeMs: 0, mesh, velocity: new Vector3(0, 0, 0) };
       });
 
+      const muzzleMaterial = new StandardMaterial("rifle-muzzle-flash-material", scene);
+      muzzleMaterial.diffuseColor = new Color3(1, 0.74, 0.2);
+      muzzleMaterial.emissiveColor = new Color3(1, 0.42, 0.06);
+      muzzleMaterial.disableLighting = true;
+      const muzzleFlash = MeshBuilder.CreateSphere(
+        "rifle-muzzle-flash",
+        { diameter: 0.085, segments: 6 },
+        scene,
+      );
+      muzzleFlash.material = muzzleMaterial;
+      muzzleFlash.isPickable = false;
+      muzzleFlash.isVisible = false;
+
       const governor = new FlashGovernor();
       const keys = new Set<string>();
+      let thrallModel: LoadedModelAsset | null = null;
+      let thrallAttachment: LoadedModelAsset | null = null;
+      let weaponModel: LoadedModelAsset | null = null;
+      let magazineNode: TransformNode | null = null;
+      let magazineBasePosition: Vector3 | null = null;
       let yaw = 0;
       let pitch = 0;
       let simulationAccumulatorMs = 0;
       let flashRemainingMs = 0;
       let fallbackRemainingMs = 0;
+      let enemyAnimationHoldMs = 0;
+      let enemyAnimationSemantic: AnimationSemantic | null = null;
+      let muzzleFlashRemainingMs = 0;
+      let recoilRemainingMs = 0;
+      let previousDamageFlash = -1;
+      let previousEnemyX = authority.getSnapshot().enemy.position.x;
+      let previousEnemyZ = authority.getSnapshot().enemy.position.z;
+
+      const playEnemyAnimation = (semantic: AnimationSemantic, holdMs: number): void => {
+        enemyAnimationSemantic = semantic;
+        enemyAnimationHoldMs = Math.max(enemyAnimationHoldMs, holdMs);
+        thrallModel?.playAnimation(semantic, semantic === "idle" || semantic === "move");
+      };
+
+      const loadPresentationAssets = async (): Promise<void> => {
+        const definitions = [
+          THRALL_MODEL,
+          THRALL_BIOME_ATTACHMENTS.house,
+          ASSAULT_RIFLE_FP,
+          HOUSE_SHARD_PACK,
+        ] as const;
+        const results = await Promise.allSettled([
+          loadModelAsset(scene, THRALL_MODEL),
+          loadModelAsset(scene, THRALL_BIOME_ATTACHMENTS.house),
+          loadModelAsset(scene, ASSAULT_RIFLE_FP),
+          loadModelAsset(scene, HOUSE_SHARD_PACK),
+        ] as const);
+
+        if (cancelled) {
+          for (const result of results) {
+            if (result.status === "fulfilled") result.value.dispose();
+          }
+          return;
+        }
+
+        const [thrallResult, attachmentResult, weaponResult, shardResult] = results;
+        if (thrallResult.status === "fulfilled") {
+          const loadedThrall = thrallResult.value;
+          thrallModel = loadedThrall;
+          shell.setEnabled(false);
+          core.setEnabled(false);
+          const initialAnimation = enemyAnimationSemantic ?? "spawn";
+          loadedThrall.playAnimation(
+            initialAnimation,
+            initialAnimation === "idle" || initialAnimation === "move",
+          );
+        }
+        if (attachmentResult.status === "fulfilled" && thrallModel !== null) {
+          const loadedAttachment = attachmentResult.value;
+          thrallAttachment = loadedAttachment;
+          loadedAttachment.root.parent = thrallModel.root;
+          loadedAttachment.root.position.setAll(0);
+        } else if (attachmentResult.status === "fulfilled") {
+          attachmentResult.value.dispose();
+        }
+        if (thrallModel !== null) {
+          applyThrallBiomeMaterials(
+            thrallAttachment === null ? [thrallModel] : [thrallModel, thrallAttachment],
+            "house",
+          );
+        }
+
+        if (weaponResult.status === "fulfilled") {
+          const loadedWeapon = weaponResult.value;
+          weaponModel = loadedWeapon;
+          loadedWeapon.root.parent = camera;
+          loadedWeapon.root.position.set(0.27, -0.26, 0.48);
+          loadedWeapon.root.scaling.setAll(0.78);
+          const magazine = loadedWeapon.findNode("MESH_Magazine");
+          if (magazine !== null && "position" in magazine) {
+            magazineNode = magazine as TransformNode;
+            magazineBasePosition = magazineNode.position.clone();
+          }
+          const muzzle = loadedWeapon.findNode("SOCKET_Muzzle");
+          if (muzzle !== null) {
+            muzzleFlash.parent = muzzle;
+            muzzleFlash.position.setAll(0);
+          }
+        }
+
+        if (shardResult.status === "fulfilled") {
+          const loadedShardPack = shardResult.value;
+          const templates = loadedShardPack.renderMeshes.filter((mesh) => mesh.getTotalVertices() > 0);
+          if (templates.length > 0) {
+            shardStates.forEach((shard, index) => {
+              const template = templates[index % templates.length];
+              const clone = template?.clone(`pooled-model-shard-${index}`, null, true) ?? null;
+              if (clone === null) return;
+              shard.mesh.dispose();
+              clone.parent = null;
+              clone.checkCollisions = false;
+              clone.isPickable = false;
+              clone.isVisible = false;
+              clone.setEnabled(true);
+              shard.mesh = clone;
+            });
+          }
+          loadedShardPack.root.setEnabled(false);
+        }
+
+        results.forEach((result, index) => {
+          if (result.status === "rejected") {
+            const reason = result.reason instanceof Error ? result.reason.message : "unknown loader error";
+            console.warn(`[models] ${definitions[index]?.assetId ?? "unknown"}: ${reason}`);
+          }
+        });
+        setAssetStatus(thrallModel !== null && weaponModel !== null ? "ready" : "fallback");
+      };
 
       const unsubscribe = authority.subscribe((update) => {
         if (update.state.phase !== "playing" && document.pointerLockElement === canvas) {
@@ -170,12 +319,22 @@ export function PracticeArena({ authority, effects, state }: PracticeArenaProps)
         }
 
         for (const event of update.events) {
+          if (event.type === "shot.fired") {
+            recoilRemainingMs = 85;
+            muzzleFlashRemainingMs = 38;
+          }
           if (event.type === "enemy.damaged") {
             flashRemainingMs = Math.max(flashRemainingMs, 55);
+            playEnemyAnimation("hit", 210);
+          }
+          if (event.type === "enemy.respawned") {
+            playEnemyAnimation("spawn", 720);
           }
           if (event.type !== "enemy.killed") {
             continue;
           }
+
+          playEnemyAnimation("death", 900);
 
           const currentEffects = effectsRef.current;
           governor.setMode(currentEffects.flashMode);
@@ -200,6 +359,8 @@ export function PracticeArena({ authority, effects, state }: PracticeArenaProps)
           }
         }
       });
+
+      void loadPresentationAssets();
 
       const handleKeyDown = (event: KeyboardEvent): void => {
         if (["KeyW", "KeyA", "KeyS", "KeyD", "KeyR"].includes(event.code)) {
@@ -269,9 +430,61 @@ export function PracticeArena({ authority, effects, state }: PracticeArenaProps)
 
         flashRemainingMs = Math.max(0, flashRemainingMs - deltaMs);
         fallbackRemainingMs = Math.max(0, fallbackRemainingMs - deltaMs);
+        enemyAnimationHoldMs = Math.max(0, enemyAnimationHoldMs - deltaMs);
+        muzzleFlashRemainingMs = Math.max(0, muzzleFlashRemainingMs - deltaMs);
+        recoilRemainingMs = Math.max(0, recoilRemainingMs - deltaMs);
         fallbackRing.isVisible = fallbackRemainingMs > 0;
         const flashScale = flashRemainingMs > 0 ? 1 : 0;
         shellMaterial.emissiveColor.set(0.07 + flashScale * 0.2, 0.025 + flashScale * 0.12, 0.2 + flashScale * 0.35);
+
+        if (thrallModel !== null) {
+          const enemyDelta = Math.hypot(
+            snapshot.enemy.position.x - previousEnemyX,
+            snapshot.enemy.position.z - previousEnemyZ,
+          );
+          const directionX = snapshot.player.position.x - snapshot.enemy.position.x;
+          const directionZ = snapshot.player.position.z - snapshot.enemy.position.z;
+          const cameraDistance = Math.hypot(directionX, directionZ);
+          thrallModel.root.position.set(snapshot.enemy.position.x, 0, snapshot.enemy.position.z);
+          thrallModel.root.rotation.y = Math.atan2(-directionX, -directionZ);
+          thrallModel.setDistanceFromCamera(cameraDistance);
+          thrallAttachment?.setDistanceFromCamera(cameraDistance);
+
+          if (!snapshot.enemy.alive && enemyAnimationHoldMs === 0) {
+            thrallModel.root.setEnabled(false);
+            thrallAttachment?.root.setEnabled(false);
+          } else if (snapshot.enemy.alive && enemyAnimationHoldMs === 0) {
+            const semantic: AnimationSemantic = enemyDelta > 0.002 ? "move" : "idle";
+            enemyAnimationSemantic = semantic;
+            thrallModel.playAnimation(semantic, true);
+          }
+
+          if (previousDamageFlash !== flashScale) {
+            applyThrallBiomeMaterials(
+              thrallAttachment === null ? [thrallModel] : [thrallModel, thrallAttachment],
+              "house",
+              flashScale,
+            );
+            previousDamageFlash = flashScale;
+          }
+        }
+        previousEnemyX = snapshot.enemy.position.x;
+        previousEnemyZ = snapshot.enemy.position.z;
+
+        if (weaponModel !== null) {
+          const recoil = recoilRemainingMs / 85;
+          weaponModel.root.position.set(0.27, -0.26, 0.48 - recoil * 0.055);
+          weaponModel.root.rotation.x = recoil * 0.035;
+          weaponModel.root.setEnabled(snapshot.phase === "playing" && snapshot.player.alive);
+          muzzleFlash.isVisible = muzzleFlashRemainingMs > 0 && snapshot.player.alive;
+        }
+        if (magazineNode !== null && magazineBasePosition !== null) {
+          magazineNode.position.copyFrom(magazineBasePosition);
+          if (snapshot.weapon.reloadRemainingMs > 0) {
+            const reloadProgress = 1 - Math.min(1, snapshot.weapon.reloadRemainingMs / 800);
+            magazineNode.position.y -= Math.sin(reloadProgress * Math.PI) * 0.24;
+          }
+        }
 
         const moveShards = effectsRef.current.shardMode === "normal";
         for (const shard of shardStates) {
@@ -341,6 +554,15 @@ export function PracticeArena({ authority, effects, state }: PracticeArenaProps)
             : status === "unsupported"
               ? "此设备不支持 WebGL2"
               : "渲染器启动失败"}
+        {status === "ready" && (
+          <span>
+            {assetStatus === "loading"
+              ? " · 模型加载中"
+              : assetStatus === "ready"
+                ? " · GLB 模型已接入"
+                : " · 部分模型失败，已使用安全回退"}
+          </span>
+        )}
       </div>
       {!state.player.alive && (
         <div className="respawn-banner">重新结晶中… {(state.player.respawnRemainingMs / 1_000).toFixed(1)}s</div>

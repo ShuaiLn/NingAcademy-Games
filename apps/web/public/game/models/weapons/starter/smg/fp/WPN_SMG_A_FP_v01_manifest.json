@@ -1,0 +1,73 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "WPN_SMG_A_FP_v01.glb",
+  "asset_id": "WPN_SMG_A_FP_v01",
+  "root_node": "WPN_SMG_A_FP",
+  "category": "weapon",
+  "variant": "FP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.1585,
+    0.7775,
+    0.5059
+  ],
+  "render": {
+    "mesh_count": 4,
+    "triangle_count": 384,
+    "triangle_budget_max": 15000,
+    "materials": [
+      "MAT_WPN_SMG_A",
+      "MAT_WPN_SMG_A_Detail"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_ADS",
+    "SOCKET_Back",
+    "SOCKET_Eject",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Muzzle"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "length_m": 0.62,
+    "ads_axis_x_error_m": 0.0,
+    "special": "independent_ejection_socket"
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 33164,
+    "nodes": 11,
+    "meshes": 4,
+    "materials": 2,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_Bolt",
+      "MESH_Magazine",
+      "MESH_MuzzleAssembly",
+      "MESH_Weapon",
+      "SOCKET_ADS",
+      "SOCKET_Back",
+      "SOCKET_Eject",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Muzzle",
+      "WPN_SMG_A_FP"
+    ],
+    "mesh_primitives": 5,
+    "total_length": 33164
+  }
+}

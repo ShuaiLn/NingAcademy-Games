@@ -1,0 +1,58 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "VFX_SummonSpawnPortal_v01.glb",
+  "asset_id": "VFX_SummonSpawnPortal_v01",
+  "root_node": "VFX_SummonSpawnPortal",
+  "category": "vfx",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    1.55,
+    1.55,
+    0.2326
+  ],
+  "render": {
+    "mesh_count": 1,
+    "triangle_count": 736,
+    "triangle_budget_max": 5000,
+    "materials": [
+      "MAT_VFX_SummonSpawnPortal"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Spawn"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "spawn_portal": true,
+    "vfx_layers_external": true
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 26956,
+    "nodes": 3,
+    "meshes": 1,
+    "materials": 1,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_SummonSpawnPortal",
+      "SOCKET_Spawn",
+      "VFX_SummonSpawnPortal"
+    ],
+    "mesh_primitives": 1,
+    "total_length": 26956
+  }
+}

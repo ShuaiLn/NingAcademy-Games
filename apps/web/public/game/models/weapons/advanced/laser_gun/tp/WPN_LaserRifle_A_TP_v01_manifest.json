@@ -1,0 +1,72 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "WPN_LaserRifle_A_TP_v01.glb",
+  "asset_id": "WPN_LaserRifle_A_TP_v01",
+  "root_node": "WPN_LaserRifle_A_TP",
+  "category": "weapon",
+  "variant": "TP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.185,
+    1.045,
+    0.4042
+  ],
+  "render": {
+    "mesh_count": 3,
+    "triangle_count": 440,
+    "triangle_budget_max": 3000,
+    "materials": [
+      "MAT_WPN_LaserRifle_A",
+      "MAT_WPN_LaserRifle_A_Detail",
+      "MAT_WPN_LaserRifle_A_Emissive"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_ADS",
+    "SOCKET_Back",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Muzzle"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "family": "laser",
+    "stage": 1,
+    "special": "",
+    "ability_vfx_baked": false
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 37512,
+    "nodes": 9,
+    "meshes": 3,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_CoolingFins",
+      "MESH_EnergyCell",
+      "MESH_Weapon",
+      "SOCKET_ADS",
+      "SOCKET_Back",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Muzzle",
+      "WPN_LaserRifle_A_TP"
+    ],
+    "mesh_primitives": 4,
+    "total_length": 37512
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "PROP_Medkit_FP_v01.glb",
+  "asset_id": "PROP_Medkit_FP_v01",
+  "root_node": "PROP_Medkit_FP",
+  "category": "consumable",
+  "variant": "FP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.24,
+    0.115,
+    0.1525
+  ],
+  "render": {
+    "mesh_count": 3,
+    "triangle_count": 176,
+    "triangle_budget_max": 3000,
+    "materials": [
+      "MAT_PROP_Medkit.001",
+      "MAT_PROP_Medkit_Emissive",
+      "MAT_PROP_Medkit_Detail"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Back",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Use"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "medical_color": "#3FBFA0",
+    "red_cross_used": false
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 17484,
+    "nodes": 8,
+    "meshes": 3,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_Latch",
+      "MESH_MedicalMark",
+      "MESH_Prop",
+      "SOCKET_Back",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Use",
+      "PROP_Medkit_FP"
+    ],
+    "mesh_primitives": 3,
+    "total_length": 17484
+  }
+}

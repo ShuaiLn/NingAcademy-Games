@@ -1,0 +1,30 @@
+{
+  "asset_id": "CHR_BOSS_IronShell_v01",
+  "status": "PASS_WITH_KNOWN_SOURCE_TOPOLOGY_WARNING",
+  "white_geometry_fix": {
+    "status": "PASS",
+    "root_cause": "COL_Body and HIT_* were exported as ordinary mesh primitives. Blender hide_render does not suppress their geometry in glTF runtimes.",
+    "fix": "Converted COL_Body and all eight HIT_* objects to same-name Empty nodes and exported custom properties through glTF extras.",
+    "technical_nodes_present": 9,
+    "technical_meshes_present": 0,
+    "runtime_collision_metadata_preserved": true
+  },
+  "checks": {
+    "only_production_render_meshes_are_visible": "PASS",
+    "collision_node_preserved": "PASS",
+    "hitbox_nodes_preserved": "PASS",
+    "collision_shape_dimensions_preserved": "PASS",
+    "bone_parent_metadata_preserved": "PASS",
+    "thirteen_animation_interfaces": "PASS",
+    "one_skin_and_46_bones": "PASS",
+    "three_pbr_materials": "PASS",
+    "mobile_1k_texture_profile": "PASS",
+    "glb_binary_roundtrip": "PASS"
+  },
+  "known_warning": "The supplied generative source remains a disconnected, triangle-only rock-shell mesh. Primitive collision is used; render meshes must not be used as mesh collision.",
+  "backups": {
+    "full_2k_blend": "C:/Users/lunin/AppData/Local/Temp/CHR_BOSS_IronShell_v01_collisionfix.blend",
+    "full_2k_glb": "C:/Users/lunin/AppData/Local/Temp/CHR_BOSS_IronShell_v01_collisionfix.glb",
+    "mobile_1k_blend_source": "C:/Users/lunin/AppData/Local/Temp/CHR_BOSS_IronShell_v01_mobile1k_collisionfix.blend"
+  }
+}

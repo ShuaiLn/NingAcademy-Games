@@ -1,0 +1,80 @@
+{
+  "standard": "NingAcademy Games Boss Asset Naming Standard v1.0",
+  "file": "CHR_BOSS_IronShell_v01.glb",
+  "asset_id": "CHR_BOSS_IronShell_v01",
+  "boss_id": "ironshell",
+  "version": "v01",
+  "self_contained": true,
+  "controllers": ["AIController", "PlayerController"],
+  "dimensions_m": [3.356, 1.991, 4.313],
+  "render": {
+    "mesh_count": 7,
+    "triangle_count": 18625,
+    "materials": [
+      "MAT_BOSS_IronShell_Body",
+      "MAT_BOSS_IronShell_Armor",
+      "MAT_BOSS_IronShell_Crystal"
+    ],
+    "texture_resolution": "1024x1024",
+    "texture_profile": "Mobile 1K"
+  },
+  "skeleton": {
+    "name": "SKEL_BOSS_IronShell",
+    "bones": 46,
+    "skins": 1,
+    "max_vertex_influences": 3
+  },
+  "animations": [
+    "idle",
+    "walk",
+    "run",
+    "attack_primary",
+    "ability_cast",
+    "hit",
+    "death",
+    "phase_change",
+    "shield_phase",
+    "stagger",
+    "break_react",
+    "ultimate",
+    "summon"
+  ],
+  "technical_nodes": {
+    "representation": "GLTF_EMPTY_WITH_EXTRAS",
+    "renderable": false,
+    "collision": ["COL_Body"],
+    "hitboxes": [
+      "HIT_Head",
+      "HIT_Torso",
+      "HIT_Pelvis",
+      "HIT_Arm_L",
+      "HIT_Arm_R",
+      "HIT_Leg_L",
+      "HIT_Leg_R",
+      "HIT_Weakpoint_Back"
+    ],
+    "extras_contract": [
+      "runtime_component",
+      "collision_only",
+      "renderable",
+      "shape",
+      "local_dimensions",
+      "half_extents",
+      "radius",
+      "height",
+      "parent_bone"
+    ]
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "nodes": 75,
+    "meshes": 7,
+    "skins": 1,
+    "materials": 3,
+    "images": 3,
+    "animations": 13,
+    "technical_nodes_with_mesh": 0,
+    "white_collision_geometry_removed": true,
+    "file_size_bytes": 5691944
+  }
+}

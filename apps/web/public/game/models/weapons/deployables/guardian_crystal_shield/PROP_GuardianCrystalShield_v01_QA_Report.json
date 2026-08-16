@@ -1,0 +1,33 @@
+{
+  "asset_id": "PROP_GuardianCrystalShield_v01",
+  "status": "PASS",
+  "production_metrics": {
+    "file_size_bytes": 69216,
+    "dimensions_m_xyz": [
+      2.055,
+      0.2245,
+      1.48
+    ],
+    "triangles": 352,
+    "meshes": 7,
+    "materials": 2,
+    "skins": 1,
+    "animations": 2
+  },
+  "checks": {
+    "fp_tp_variant_explicit": "PASS",
+    "metric_scale": "PASS",
+    "origin_contract": "PASS",
+    "required_sockets_exported": "PASS",
+    "independent_gameplay_parts": "PASS",
+    "pbr_metallic_roughness": "PASS",
+    "material_count_max_3": "PASS",
+    "triangle_budget": "PASS",
+    "naming_standard": "PASS",
+    "no_camera_or_light": "PASS",
+    "glb_binary_roundtrip": "PASS",
+    "rig_exported": "PASS",
+    "animations_exported": "PASS"
+  },
+  "notes": "Prototype/basic production mesh; budgets are upper limits, not density targets."
+}

@@ -1,0 +1,16 @@
+# Runtime keeps approved GLB files, JSON manifests, catalogs and embedded textures.
+# Source authoring/QA artifacts are not part of a browser deployment.
+public/game/models/**/*.blend
+public/game/models/**/*.blend1
+public/game/models/**/*.py
+public/game/models/**/*_QA_Report.json
+public/game/models/**/*_preview.png
+public/game/models/previews/
+
+# Delivered source/reference duplicates are retained for authoring comparison,
+# but the runtime registry and deployment both use only the canonical paths.
+public/game/models/CHR_BOSS_IronShell_v01.glb
+public/game/models/boss/Hunter.glb
+public/game/models/boss/Plague.glb
+public/game/models/boss/Swarm.glb
+public/game/models/survivors/NingAcademy_Survivor_Canonical_V4_StateReady.glb

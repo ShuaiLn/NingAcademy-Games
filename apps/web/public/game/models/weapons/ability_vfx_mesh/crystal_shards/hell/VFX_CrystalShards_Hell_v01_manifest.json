@@ -1,0 +1,67 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "VFX_CrystalShards_Hell_v01.glb",
+  "asset_id": "VFX_CrystalShards_Hell_v01",
+  "root_node": "VFX_CrystalShards_Hell",
+  "category": "vfx",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    0.1676,
+    0.1864,
+    0.2161
+  ],
+  "render": {
+    "mesh_count": 8,
+    "triangle_count": 160,
+    "triangle_budget_max": 5000,
+    "materials": [
+      "MAT_VFX_CrystalShards_Hell"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_BurstOrigin"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "library_asset": true,
+    "biome": "hell",
+    "independent_shape_count": 8,
+    "runtime_use": "weapon_kill_crystal_burst"
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 18476,
+    "nodes": 10,
+    "meshes": 8,
+    "materials": 1,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_CrystalShard_01",
+      "MESH_CrystalShard_02",
+      "MESH_CrystalShard_03",
+      "MESH_CrystalShard_04",
+      "MESH_CrystalShard_05",
+      "MESH_CrystalShard_06",
+      "MESH_CrystalShard_07",
+      "MESH_CrystalShard_08",
+      "SOCKET_BurstOrigin",
+      "VFX_CrystalShards_Hell"
+    ],
+    "mesh_primitives": 8,
+    "total_length": 18476
+  }
+}

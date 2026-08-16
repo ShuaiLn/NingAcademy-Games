@@ -1,0 +1,76 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "WPN_Rifle_Sniper_A_FP_v01.glb",
+  "asset_id": "WPN_Rifle_Sniper_A_FP_v01",
+  "root_node": "WPN_Rifle_Sniper_A_FP",
+  "category": "weapon",
+  "variant": "FP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.3216,
+    1.415,
+    0.6363
+  ],
+  "render": {
+    "mesh_count": 7,
+    "triangle_count": 572,
+    "triangle_budget_max": 15000,
+    "materials": [
+      "MAT_WPN_Rifle_Sniper_A",
+      "MAT_WPN_Rifle_Sniper_A_Detail",
+      "MAT_WPN_Rifle_Sniper_A_ScopeLens"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_ADS",
+    "SOCKET_Back",
+    "SOCKET_Eject",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Muzzle"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "ads_axis_x_error_m": 0.0,
+    "special": "independent_scope_lens_and_bolt"
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 46136,
+    "nodes": 14,
+    "meshes": 7,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_Bipod",
+      "MESH_Bolt",
+      "MESH_BoltHandle",
+      "MESH_Magazine",
+      "MESH_MuzzleAssembly",
+      "MESH_ScopeLens",
+      "MESH_Weapon",
+      "SOCKET_ADS",
+      "SOCKET_Back",
+      "SOCKET_Eject",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Muzzle",
+      "WPN_Rifle_Sniper_A_FP"
+    ],
+    "mesh_primitives": 8,
+    "total_length": 46136
+  }
+}

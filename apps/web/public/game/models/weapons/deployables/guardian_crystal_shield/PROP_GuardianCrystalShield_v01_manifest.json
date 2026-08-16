@@ -1,0 +1,87 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "PROP_GuardianCrystalShield_v01.glb",
+  "asset_id": "PROP_GuardianCrystalShield_v01",
+  "root_node": "PROP_GuardianCrystalShield",
+  "category": "vfx",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    2.055,
+    0.2245,
+    1.48
+  ],
+  "render": {
+    "mesh_count": 7,
+    "triangle_count": 352,
+    "triangle_budget_max": 5000,
+    "materials": [
+      "MAT_PROP_GuardianCrystalShield",
+      "MAT_PROP_GuardianCrystalShield_Edge"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_ShieldCenter"
+  ],
+  "rig": {
+    "name": "SKEL_GuardianCrystalShield",
+    "bones": 7,
+    "animations": [
+      "ANIM_Idle",
+      "ANIM_Break"
+    ]
+  },
+  "runtime_contract": {
+    "durability_states": [
+      100,
+      75,
+      50,
+      25,
+      0
+    ],
+    "floating": true,
+    "touches_ground": false,
+    "has_roof": false
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 69216,
+    "nodes": 17,
+    "meshes": 7,
+    "materials": 2,
+    "skins": 1,
+    "animations": 2,
+    "animation_names": [
+      "ANIM_Break",
+      "ANIM_Idle"
+    ],
+    "node_names": [
+      "ShieldShard_01",
+      "ShieldShard_02",
+      "ShieldShard_03",
+      "ShieldShard_04",
+      "ShieldShard_05",
+      "ShieldShard_06",
+      "Root",
+      "MESH_ShieldEdge",
+      "MESH_ShieldShard_01",
+      "MESH_ShieldShard_02",
+      "MESH_ShieldShard_03",
+      "MESH_ShieldShard_04",
+      "MESH_ShieldShard_05",
+      "MESH_ShieldShard_06",
+      "SKEL_GuardianCrystalShield",
+      "SOCKET_ShieldCenter",
+      "PROP_GuardianCrystalShield"
+    ],
+    "mesh_primitives": 7,
+    "total_length": 69216
+  }
+}

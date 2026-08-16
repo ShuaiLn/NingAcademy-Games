@@ -1,0 +1,74 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "WPN_Lightsaber_Prototype_FP_v01.glb",
+  "asset_id": "WPN_Lightsaber_Prototype_FP_v01",
+  "root_node": "WPN_Lightsaber_Prototype_FP",
+  "category": "weapon",
+  "variant": "FP",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "primary_grip",
+  "dimensions_m_xyz": [
+    0.11,
+    1.28,
+    0.11
+  ],
+  "render": {
+    "mesh_count": 2,
+    "triangle_count": 440,
+    "triangle_budget_max": 15000,
+    "materials": [
+      "MAT_WPN_Lightsaber_Prototype",
+      "MAT_WPN_Lightsaber_Prototype_Detail",
+      "MAT_WPN_Lightsaber_Prototype_Emissive"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Back",
+    "SOCKET_Blade_End",
+    "SOCKET_Blade_Start",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Sweep_End",
+    "SOCKET_Sweep_Start"
+  ],
+  "rig": {
+    "name": null,
+    "bones": 0,
+    "animations": []
+  },
+  "runtime_contract": {
+    "stage": 1,
+    "blade_vfx_baked": false,
+    "trail_vfx_baked": false
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 19872,
+    "nodes": 10,
+    "meshes": 2,
+    "materials": 3,
+    "skins": 0,
+    "animations": 0,
+    "animation_names": [],
+    "node_names": [
+      "MESH_Blade",
+      "MESH_Handle",
+      "SOCKET_Back",
+      "SOCKET_Blade_End",
+      "SOCKET_Blade_Start",
+      "SOCKET_Grip_L",
+      "SOCKET_Grip_R",
+      "SOCKET_Sweep_End",
+      "SOCKET_Sweep_Start",
+      "WPN_Lightsaber_Prototype_FP"
+    ],
+    "mesh_primitives": 3,
+    "total_length": 19872
+  }
+}

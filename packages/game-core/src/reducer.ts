@@ -398,10 +398,7 @@ export interface GameSimulationResult {
   readonly events: readonly CombatEvent[];
 }
 
-/**
- * Server-only fixed-step seam. Network clients cannot submit tick commands;
- * the authoritative room calls this from its 30 Hz simulation interval.
- */
+/** Host-only fixed-step seam. Non-host peers cannot submit tick commands. */
 export function advanceGameSimulation(state: GameState, tickCount = 1): GameSimulationResult {
   if (state.status !== "running" || state.combat === null) {
     throw new Error("Cannot advance combat before the room is running");

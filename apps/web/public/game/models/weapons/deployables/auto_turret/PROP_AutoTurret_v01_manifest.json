@@ -1,0 +1,78 @@
+{
+  "standard": "NingAcademy Games Naming Standard v1.0",
+  "file": "PROP_AutoTurret_v01.glb",
+  "asset_id": "PROP_AutoTurret_v01",
+  "root_node": "PROP_AutoTurret",
+  "category": "deployable",
+  "variant": "World",
+  "version": "v01",
+  "units": "meters",
+  "axis_contract": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "origin_contract": "world_base_center",
+  "dimensions_m_xyz": [
+    0.6296,
+    0.7702,
+    0.7441
+  ],
+  "render": {
+    "mesh_count": 5,
+    "triangle_count": 564,
+    "triangle_budget_max": 3500,
+    "materials": [
+      "MAT_PROP_AutoTurret",
+      "MAT_PROP_AutoTurret_Detail",
+      "MAT_PROP_AutoTurret_Emissive"
+    ],
+    "material_system": "PBR Metallic-Roughness"
+  },
+  "sockets": [
+    "SOCKET_Muzzle",
+    "SOCKET_Placement"
+  ],
+  "rig": {
+    "name": "SKEL_AutoTurret",
+    "bones": 3,
+    "animations": [
+      "ANIM_Idle",
+      "ANIM_Track",
+      "ANIM_Fire"
+    ]
+  },
+  "runtime_contract": {
+    "damage_stages": 2,
+    "placement_preview": "material_state"
+  },
+  "glb_validation": {
+    "format": "glTF 2.0",
+    "file_size_bytes": 66424,
+    "nodes": 12,
+    "meshes": 5,
+    "materials": 3,
+    "skins": 1,
+    "animations": 3,
+    "animation_names": [
+      "ANIM_Fire",
+      "ANIM_Idle",
+      "ANIM_Track"
+    ],
+    "node_names": [
+      "GunBarrel",
+      "TurretHead",
+      "Root",
+      "BRK_DamagePlate_01",
+      "BRK_DamagePlate_02",
+      "MESH_GunBarrel",
+      "MESH_TurretBase",
+      "MESH_TurretHead",
+      "SKEL_AutoTurret",
+      "SOCKET_Muzzle",
+      "SOCKET_Placement",
+      "PROP_AutoTurret"
+    ],
+    "mesh_primitives": 7,
+    "total_length": 66424
+  }
+}
