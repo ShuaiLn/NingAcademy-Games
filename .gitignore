@@ -1,5 +1,7 @@
 # Dependencies
 node_modules/
+.pnp
+.pnp.js
 
 # Environment files (never commit secrets)
 .env
@@ -10,9 +12,11 @@ node_modules/
 # Next.js and build output
 .next/
 out/
+build/
 dist/
 coverage/
 *.tsbuildinfo
+next-env.d.ts
 
 # Test and tool caches
 .turbo/
@@ -27,6 +31,8 @@ test-results/
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Local AI / MCP config
 .agents/
