@@ -296,6 +296,12 @@ export function getGamesGateway(config: GamesConfig): GamesGateway {
     allowExitOnIdle: true,
     application_name: "ningacademy-games-vercel",
     connectionString: config.databaseUrl,
+    ssl: config.databaseCa
+      ? {
+          ca: config.databaseCa,
+          rejectUnauthorized: true,
+        }
+      : undefined,
     max: 4,
     statement_timeout: 5_000,
   });

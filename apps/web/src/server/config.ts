@@ -11,6 +11,7 @@ export interface IceServerConfig {
 export interface GamesConfig {
   readonly databaseRole: "games_api" | null;
   readonly databaseUrl: string | null;
+  readonly databaseCa: string | null;
   readonly gameSessionCookieName: string;
   readonly iceServers: readonly IceServerConfig[];
   readonly mainOrigin: string;
@@ -24,6 +25,29 @@ type EnvironmentSource = Readonly<Record<string, string | undefined>>;
 
 const COOKIE_NAME_PATTERN = /^[!#$%&'*+.^_`|~0-9A-Za-z-]{1,64}$/;
 const RULESET_PATTERN = /^[A-Za-z0-9._-]{1,64}$/;
+
+function readDatabaseCa(
+  value: string | undefined,
+  production: boolean,
+): string | null {
+  const candidate = value?.trim();
+
+  if (!candidate) {
+    if (production) {
+      throw new Error("GAME_DATABASE_CA is required in production");
+    }
+    return null;
+  }
+
+  if (
+    !candidate.includes("-----BEGIN CERTIFICATE-----") ||
+    !candidate.includes("-----END CERTIFICATE-----")
+  ) {
+    throw new Error("GAME_DATABASE_CA must contain a PEM certificate");
+  }
+
+  return candidate;
+}
 
 function readRuntimeEnvironment(value: string | undefined): RuntimeEnvironment {
   const candidate = value ?? "development";
@@ -162,9 +186,10 @@ export function readGamesConfig(env: EnvironmentSource): GamesConfig {
     throw new Error("GAME_RULESET_VERSION contains unsupported characters");
   }
 
-  return {
+return {
     databaseRole: readDatabaseRole(env.GAME_DATABASE_ROLE, production),
     databaseUrl: readDatabaseUrl(env.GAME_DATABASE_URL, production),
+    databaseCa: readDatabaseCa(env.GAME_DATABASE_CA, production),
     gameSessionCookieName,
     iceServers: readIceServers(env, production),
     mainOrigin: readOrigin(

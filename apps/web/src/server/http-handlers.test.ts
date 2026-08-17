@@ -4,9 +4,15 @@ import type { GamesConfig } from "./config";
 import { handleCreateRoom, handleJoinRoom, handleRedeem, handleSessionStatus } from "./http-handlers";
 import { GamesDatabaseError, type GamesGateway } from "./postgres-games-gateway";
 
+
+const TEST_DATABASE_CA = `-----BEGIN CERTIFICATE-----
+TEST
+-----END CERTIFICATE-----`;
+
 const ticket = "T".repeat(43);
 const sessionToken = "S".repeat(43);
 const config: GamesConfig = {
+  databaseCa: TEST_DATABASE_CA,
   databaseRole: "games_api",
   databaseUrl: "postgresql://games_api_login:secret@db.example/postgres",
   gameSessionCookieName: "__Host-ning_game_session",

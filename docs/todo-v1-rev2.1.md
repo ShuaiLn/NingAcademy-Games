@@ -29,7 +29,7 @@
 | 阶段 | 内容 | 状态 | 主要缺口 |
 |---|---|---|---|
 | P-1 | 数据库审计（主站仓库） | ✅ 完成 | 未来任何新 Production 发布前需要**重新**跑只读 preflight（不是一次性的） |
-| P0 | 独立仓库、身份链、P2P 信令基础设施 | 🔄 数据库层已部署，Vercel/DNS/LOGIN 待 AI 接续 | migration 审批已完成（2026-08-16 起 9 个 migration 均已在 Production 生效，见下）；剩 3 项用户授权未拿到（DB LOGIN/Vercel 项目创建/DNS），另有一个新发现的 `rls_auto_enable()` PUBLIC EXECUTE 安全告警需先修（见 §2.2.0-1a），其余部署、配置、验证均为 AI 可执行任务，见 §2.2 |
+| P0 | 独立仓库、身份链、P2P 信令基础设施 | 🔄 数据库层 9/10 migration 已部署，其余卡在 4 项 🚫 用户操作 | **需要你本人操作的 4 件事**（见 §2.2.0）：①批准 `rls_auto_enable()` 收权 migration 上线（已起草+CI 通过，只差批准）②创建受限数据库 LOGIN ③创建 Games Vercel Production 项目 ④配置 DNS。这 4 项就位后，§2.2.1–2.2.5（配置/部署/验证/parity audit）全部由 AI 接续，不需要你再手动操作 |
 | P1 | 单人垂直切片（一图一枪一怪） | 🔄 基本完成，缺对抗性测试 | 缺显式的"拒绝伪造权威状态"测试用例 |
 | P2 | Babylon 场景/预测/可访问性/R2 资产管线 | 🔄 可访问性工具链完成，资产管线未接入 | R2 四 bucket、`assets.ningacademy.org`、client 预测/reconciliation 未确认 |
 | P3 | 题目系统与听力防泄漏 | 🔄 协议层完成，判题/音频管线未做 | 听力 HMAC key 轮换、Cloudflare Worker、答题保护、听力静音总线均未实现 |
@@ -97,13 +97,19 @@
 
 ### 2.2 生产部署 Rollout：用户 4 项授权 → AI 接续完成
 
-> 整条链路只有 **2.2.0** 的 4 件事必须由用户本人操作或明确批准。这 4 件事分别就位后，2.2.1–2.2.5（配置→部署→验证→DB parity audit→问题修复）全部由 AI 通过 Supabase MCP 工具（`apply_migration`/`list_migrations`/`execute_sql`/`get_advisors`）、Vercel CLI/API、Cloudflare CLI/API、脚本与测试工具接续执行，不需要用户逐步手动操作。**不要在 2.2.0-1 批准的清单之外主动扩大 Production 写入范围。**
+> 整条链路只有 **2.2.0** 里的几件事必须由用户本人操作或明确批准：原始 4 件事中的第 1 件（9 个 migration 的批准）已完成，**剩 4 件（1a/2/3/4）待你操作**，见下表。这些就位后，2.2.1–2.2.5（配置→部署→验证→DB parity audit→问题修复）全部由 AI 通过 Supabase MCP 工具（`apply_migration`/`list_migrations`/`execute_sql`/`get_advisors`）、Vercel CLI/API、Cloudflare CLI/API、脚本与测试工具接续执行，不需要用户逐步手动操作。**不要在已批准的清单之外主动扩大 Production 写入范围。**
 
-#### 2.2.0 🚫 用户侧授权（原 4 项，1 项已完成，新增 1 项，剩 3 项阻塞）
+#### 2.2.0 🚫 用户侧授权（原 4 项中的第 1 项已完成；剩 1a/2/3/4 共 4 项待你操作）
 
-1. [x] 🚫 **批准 Production migration**：`20260815160000` ~ `20260815200000` 这 9 个 migration（含 5 个游戏相关）已于 2026-08-16 按文件名顺序应用到 Production——`mcp__supabase__list_migrations` 实测 Production 共 28 个 migration，与 Git 当前 29 条历史中的**前 28 条**逐条匹配；Git 第 29 条（`20260816150000_restrict_rls_auto_enable_execute.sql`，见 1a）是新起草、**尚未应用到 Production** 的 pending migration，不在这次核对范围内。**注意**：其中 `20260815180000_game_session_identity_v2.sql`、`20260815200000_game_p2p_signaling.sql` 两个文件在最初编写后又经历过 Postgres 17 临时角色成员关系清理的 bug 修复（commit `86a20a4`/`48471fa`/`a0bf694`），实际执行到 Production 上的是哪个版本尚未做逐字节确认，建议在 §2.2.4 parity audit 里一并核对。
+> **需要你本人操作/批准的还有 4 件事：1a、2、3、4。** 除此之外的一切（migration 执行、验证、Vercel/Cloudflare 配置、部署、冒烟测试、parity audit）都是 AI 可以直接做的，不需要等你逐步操作。
+
+1. [x] 🚫 **批准 Production migration**（已完成，2026-08-16）：`20260815160000` ~ `20260815200000` 这 9 个 migration（含 5 个游戏相关）已按文件名顺序应用到 Production——`mcp__supabase__list_migrations` 实测 Production 共 28 个 migration，与 Git 当前 29 条历史中的**前 28 条**逐条匹配；Git 第 29 条（`20260816150000_restrict_rls_auto_enable_execute.sql`，见 1a）是另一个 pending migration，不在这次核对范围内。**注意**：其中 `20260815180000_game_session_identity_v2.sql`、`20260815200000_game_p2p_signaling.sql` 两个文件在最初编写后又经历过 Postgres 17 临时角色成员关系清理的 bug 修复（commit `86a20a4`/`48471fa`/`a0bf694`），实际执行到 Production 上的是哪个版本尚未做逐字节确认，建议在 §2.2.4 parity audit 里一并核对。
    - 验证项：`docs/p1/MIGRATION_DRIFT_REPORT.md`"2026-08-16 Production deployment confirmed"一节记录了这次 spot-check 的范围与限制；**正式的受保护只读 schema/ACL/FK 全量重导出仍未在部署后重跑过**，不能当作已完成的完整 parity audit
-1a. [ ] 🚫 **批准新的 `rls_auto_enable()` EXECUTE 收权 migration**：Security Advisor 复查发现 `public.rls_auto_enable()`（Supabase Dashboard 自动创建的 RLS 自动启用 event trigger 函数）仍带 PostgreSQL 默认的 PUBLIC EXECUTE，`anon`/`authenticated`/`service_role`/`game_server`/`games_api` 都能直接调用。已起草 `supabase/migrations/20260816150000_restrict_rls_auto_enable_execute.sql`（只 revoke EXECUTE，不动函数体/owner/event trigger），**尚未应用到 Production**，需要同样的只读 preflight + 人工批准流程——建议排在步骤 2（创建 `games_api_login`）之前完成，保持权限链从一开始就是干净的
+
+1a. [ ] 🚫 **批准新的 `rls_auto_enable()` EXECUTE 收权 migration** ——**只差你批准，其余都已就绪**：Security Advisor 复查发现 `public.rls_auto_enable()`（Supabase Dashboard 自动创建的 RLS 自动启用 event trigger 函数）仍带 PostgreSQL 默认的 PUBLIC EXECUTE，`anon`/`authenticated`/`service_role`/`game_server`/`games_api` 都能直接调用。
+    - 已起草 `supabase/migrations/20260816150000_restrict_rls_auto_enable_execute.sql`：只 `revoke execute`，不动函数体/owner/`SECURITY DEFINER`/event trigger；且已改为 `pg_catalog.to_regprocedure()` 判空后再 `execute` 的条件 no-op 写法，不存在该函数的环境（clean replay/CI/本地）安全跳过
+    - 2026-08-16 首版曾在 GitHub Actions 上导致 P-1 clean replay 失败（`SQLSTATE 42883 undefined_function`，run #38）；修复后 **run #39（2026-08-17）P-1 replay 已 PASS**
+    - **尚未应用到 Production**，需要同样的只读 preflight + 人工批准流程——建议排在步骤 2（创建 `games_api_login`）之前完成，保持权限链从一开始就是干净的
 2. [ ] 🚫 **创建并授权受限数据库 LOGIN**：在 Supabase 控制台创建一个可登录、无 owner/service-role 权限的 server-only credential，并执行 `GRANT games_api TO <login>`（不得复用任何现有 owner/service_role 凭据；`games_api` role 已存在，但建议等步骤 1a 的 ACL 收紧 migration 落地后再创建，保持权限链干净）
 3. [ ] 🚫 **创建 Games Vercel Production 项目**：创建独立 Vercel Project 并绑定到 `NingAcademy-Games` GitHub 仓库（不可与主站共用同一个 Vercel Project，可以同一个 Vercel Team）——与步骤 1a、2 **无依赖，可并行**
 4. [ ] 🚫 **配置正式域名 DNS**：添加 `game.ningacademy.org`（本节）与 `assets.ningacademy.org`（见 §4.3）两条 DNS 记录——与步骤 1a、2、3 **无依赖，可并行**
@@ -822,12 +828,14 @@
 
 ## 18. 跨阶段：部署与环境配置清单（汇总，标注哪些是 🚫 用户授权、哪些是 AI 可执行，避免散落漏项）
 
-- [ ] 🚫 Production migration 最终审批（见 §2.2.0-1）
-- [ ] ⬜ Production migration 实际执行（见 §2.2.1，AI 用 Supabase MCP 执行，依赖上一条批准）
-- [ ] 🚫 受限 DB LOGIN 创建与授权（见 §2.2.0-2）
-- [ ] 🚫 Games Vercel Production 项目创建（见 §2.2.0-3）
+- [x] 🚫 Production migration 最终审批（9 个 migration，见 §2.2.0-1）—— 已完成 2026-08-16
+- [x] ⬜ Production migration 实际执行（见 §2.2.1）—— 已完成 2026-08-16，Production 28 个版本与 Git 前 28 条逐条匹配
+- [ ] 🚫 **`rls_auto_enable()` EXECUTE 收权 migration 审批**（见 §2.2.0-1a）—— migration 已起草、P-1 clean replay CI 已通过（run #39，2026-08-17），**只差你批准执行到 Production**
+- [ ] ⬜ `rls_auto_enable()` migration 实际执行（见 §2.2.1，AI 用 Supabase MCP 执行，依赖上一条批准）
+- [ ] 🚫 **受限 DB LOGIN 创建与授权**（见 §2.2.0-2）—— 建议排在上一条之后做，保持权限链干净
+- [ ] 🚫 **Games Vercel Production 项目创建**（见 §2.2.0-3）—— 与其余 🚫 项无依赖，可随时单独做
 - [ ] ⬜ Games Vercel 环境变量配置（见 §2.2.1，AI 用 Vercel CLI/API 执行，依赖上一条项目创建）
-- [ ] 🚫 `game.ningacademy.org` / `assets.ningacademy.org` DNS 记录（见 §2.2.0-4）
+- [ ] 🚫 **`game.ningacademy.org` / `assets.ningacademy.org` DNS 记录**（见 §2.2.0-4）—— 与其余 🚫 项无依赖，可随时单独做
 - [ ] ⬜ R2 四 bucket 创建与 API token（见 §4.3，AI 用 Cloudflare API/`wrangler` 执行）
 - [ ] ⬜ Cloudflare Worker 音频代理部署（见 §5.5，AI 用 `wrangler` 执行；生产自定义域路由依赖上面的 DNS 记录）
 - [ ] ⬜ TURN 服务器：V1 默认不购买，仅预留接口（`GAME_TURN_*`），后续按需接入（不阻塞发布）
