@@ -1,4 +1,5 @@
 import type { RandomState } from "./types.js";
+import type { CombatMapLayout } from "./map-layout.js";
 
 export const COMBAT_TICK_RATE = 30 as const;
 export const COMBAT_TICK_MS = 1_000 / COMBAT_TICK_RATE;
@@ -6,6 +7,9 @@ export const COMBAT_REWIND_WINDOW_MS = 250 as const;
 
 export type CombatBiome = "house" | "grassland" | "desert" | "hell";
 export type CombatEntityKind = "survivor" | "thrall";
+export type EnemyAnimationState = "attacking" | "dead" | "hit" | "idle" | "moving" | "spawning";
+export type WaveDirectorPhase = "break" | "combat" | "spawning";
+export type WaveKind = "standard" | "supply" | "boss";
 
 export interface CombatVector2 {
   readonly x: number;
@@ -38,19 +42,27 @@ export interface CombatSurvivorState {
   readonly position: CombatVector2;
   readonly respawnAtTick: number | null;
   readonly rifle: RifleState;
+  readonly spawnPointIndex: number;
   readonly velocity: CombatVector2;
   readonly input: SurvivorInputState;
 }
 
 export interface ThrallState {
   readonly alive: boolean;
+  readonly animationRevision: number;
+  readonly animationState: EnemyAnimationState;
+  readonly animationUntilTick: number | null;
   readonly attackReadyTick: number;
-  readonly generation: number;
+  readonly despawnAtTick: number | null;
+  readonly entityId: string;
   readonly hp: number;
-  readonly id: string;
   readonly maxHp: number;
   readonly position: CombatVector2;
-  readonly respawnAtTick: number | null;
+  readonly spawnTick: number;
+  readonly spawnZoneId: string;
+  readonly targetPlayerId: string | null;
+  readonly velocity: CombatVector2;
+  readonly waveNumber: number;
 }
 
 export interface CombatHistorySurvivor {
@@ -60,26 +72,50 @@ export interface CombatHistorySurvivor {
 
 export interface CombatHistoryThrall {
   readonly alive: boolean;
-  readonly generation: number;
   readonly position: CombatVector2;
 }
 
 export interface CombatHistoryFrame {
+  readonly enemies: Readonly<Record<string, CombatHistoryThrall>>;
   readonly survivors: Readonly<Record<string, CombatHistorySurvivor>>;
-  readonly thrall: CombatHistoryThrall;
   readonly tick: number;
   readonly timeMs: number;
 }
 
+export interface WaveSpawnScheduleEntry {
+  readonly entityId: string;
+  readonly spawnAtTick: number;
+  readonly spawnSeed: number;
+  readonly spawnZoneId: string;
+}
+
+export interface WaveDirectorState {
+  readonly breakEndsAtTick: number | null;
+  readonly difficultyMultiplier: number;
+  readonly enemiesRemaining: number;
+  readonly phase: WaveDirectorPhase;
+  readonly revision: number;
+  readonly spawnCursor: number;
+  readonly spawnSchedule: readonly WaveSpawnScheduleEntry[];
+  readonly spawnSeed: number;
+  readonly startedAtTick: number;
+  readonly waveKind: WaveKind;
+  readonly waveNumber: number;
+}
+
 export interface CombatState {
   readonly biome: CombatBiome;
+  readonly enemies: Readonly<Record<string, ThrallState>>;
+  readonly enemyRevision: number;
+  readonly enemyTombstones: Readonly<Record<string, number>>;
   readonly history: readonly CombatHistoryFrame[];
+  readonly map: CombatMapLayout;
   readonly rng: RandomState;
   readonly startedAtMs: number;
   readonly survivors: Readonly<Record<string, CombatSurvivorState>>;
-  readonly thrall: ThrallState;
   readonly tick: number;
   readonly timeMs: number;
+  readonly wave: WaveDirectorState;
 }
 
 export type CombatCommand =
@@ -105,10 +141,12 @@ export type CombatEvent =
   | {
       readonly type: "combat.started";
       readonly biome: CombatBiome;
+      readonly canonicalLayoutId: string;
+      readonly enemyIds: readonly string[];
+      readonly layoutHash: string;
       readonly seed: number;
-      readonly thrallId: string;
-      readonly thrallPosition: CombatVector2;
       readonly tickRate: typeof COMBAT_TICK_RATE;
+      readonly waveNumber: number;
     }
   | {
       readonly type: "combat.shot_fired";
@@ -146,6 +184,35 @@ export type CombatEvent =
       readonly entityKind: CombatEntityKind;
       readonly position: CombatVector2;
       readonly tick: number;
+    }
+  | {
+      readonly type: "combat.enemy_spawned";
+      readonly entityId: string;
+      readonly position: CombatVector2;
+      readonly spawnZoneId: string;
+      readonly tick: number;
+      readonly waveNumber: number;
+    }
+  | {
+      readonly type: "combat.enemy_despawned";
+      readonly entityId: string;
+      readonly tick: number;
+    }
+  | {
+      readonly type: "combat.wave_started";
+      readonly enemyCount: number;
+      readonly spawnSeed: number;
+      readonly tick: number;
+      readonly waveKind: WaveKind;
+      readonly waveNumber: number;
+      readonly waveRevision: number;
+    }
+  | {
+      readonly type: "combat.wave_completed";
+      readonly breakEndsAtTick: number;
+      readonly tick: number;
+      readonly waveNumber: number;
+      readonly waveRevision: number;
     };
 
 export type CombatRuleErrorCode =

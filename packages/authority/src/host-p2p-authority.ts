@@ -1,6 +1,8 @@
 import {
   advanceGameSimulation,
   createInitialGameState,
+  GAME_STATE_SCHEMA_VERSION,
+  isCompatibleCombatMapLayout,
   reduceGameCommand,
   type CreateGameStateOptions,
   type GameState,
@@ -62,6 +64,24 @@ export class HostP2PAuthorityRuntime {
     }));
   }
 
+  detachMember(memberId: string, nowMs = Date.now()): void {
+    const existing = this.#state.players[memberId];
+    if (existing === undefined || existing.status === "left" || this.#state.status === "ended") return;
+    const result = reduceGameCommand(this.#state, {
+      actor: { kind: "user", userId: memberId },
+      atMs: nowMs,
+      command: { type: "player.leave" },
+      commandId: `${this.#state.roomId}:detach:${memberId}:${this.#state.revision}`,
+    });
+    if (!result.accepted) throw new Error(result.error.message);
+    this.#accept(result.state, createEventEnvelopes({
+      events: result.events,
+      occurredAtMs: nowMs,
+      revision: result.state.revision,
+      roomId: this.#state.roomId,
+    }));
+  }
+
   processCommand(memberId: string, envelope: CommandEnvelope, nowMs = Date.now()): AuthorityDispatchResult {
     if (envelope.roomId !== this.#state.roomId || this.#state.players[memberId]?.status === "left") {
       throw new Error("command channel is not bound to an active room member");
@@ -92,11 +112,22 @@ export class HostP2PAuthorityRuntime {
   restoreCheckpoint(checkpoint: unknown): void {
     if (
       typeof checkpoint !== "object" || checkpoint === null || Array.isArray(checkpoint)
-      || (checkpoint as { schemaVersion?: unknown }).schemaVersion !== 1
+      || (checkpoint as { schemaVersion?: unknown }).schemaVersion !== GAME_STATE_SCHEMA_VERSION
       || (checkpoint as { roomId?: unknown }).roomId !== this.#state.roomId
       || !Number.isSafeInteger((checkpoint as { revision?: unknown }).revision)
     ) throw new Error("host checkpoint is invalid");
-    this.#state = checkpoint as GameState;
+    const candidate = checkpoint as GameState;
+    if (
+      candidate.combat !== null
+      && (
+        !isCompatibleCombatMapLayout(candidate.combat.map)
+        || !Number.isSafeInteger(candidate.combat.enemyRevision)
+        || candidate.combat.enemyRevision < 0
+        || !Number.isSafeInteger(candidate.combat.wave.revision)
+        || candidate.combat.wave.revision < 0
+      )
+    ) throw new Error("host checkpoint world state is invalid");
+    this.#state = candidate;
     this.#emitSnapshot();
   }
 

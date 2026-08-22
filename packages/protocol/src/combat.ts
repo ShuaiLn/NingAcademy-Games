@@ -79,17 +79,23 @@ export function isCombatEvent(value: unknown): value is CombatEvent {
         hasExactKeys(value, [
           "type",
           "biome",
+          "canonicalLayoutId",
+          "enemyIds",
+          "layoutHash",
           "seed",
-          "thrallId",
-          "thrallPosition",
           "tickRate",
+          "waveNumber",
         ]) &&
         isBiome(value.biome) &&
+        isIdentifier(value.canonicalLayoutId) &&
+        Array.isArray(value.enemyIds) &&
+        value.enemyIds.every(isIdentifier) &&
+        isIdentifier(value.layoutHash) &&
         isNonNegativeInteger(value.seed) &&
         value.seed <= 0xffff_ffff &&
-        isIdentifier(value.thrallId) &&
-        isVector2(value.thrallPosition) &&
-        value.tickRate === COMBAT_TICK_RATE
+        value.tickRate === COMBAT_TICK_RATE &&
+        isNonNegativeInteger(value.waveNumber) &&
+        value.waveNumber > 0
       );
     case "combat.shot_fired":
       return (
@@ -148,6 +154,49 @@ export function isCombatEvent(value: unknown): value is CombatEvent {
         (value.entityKind === "survivor" || value.entityKind === "thrall") &&
         isVector2(value.position) &&
         isNonNegativeInteger(value.tick)
+      );
+    case "combat.enemy_spawned":
+      return (
+        hasExactKeys(value, ["type", "entityId", "position", "spawnZoneId", "tick", "waveNumber"]) &&
+        isIdentifier(value.entityId) &&
+        isVector2(value.position) &&
+        isIdentifier(value.spawnZoneId) &&
+        isNonNegativeInteger(value.tick) &&
+        isNonNegativeInteger(value.waveNumber) &&
+        value.waveNumber > 0
+      );
+    case "combat.enemy_despawned":
+      return (
+        hasExactKeys(value, ["type", "entityId", "tick"]) &&
+        isIdentifier(value.entityId) &&
+        isNonNegativeInteger(value.tick)
+      );
+    case "combat.wave_started":
+      return (
+        hasExactKeys(value, [
+          "type",
+          "enemyCount",
+          "spawnSeed",
+          "tick",
+          "waveKind",
+          "waveNumber",
+          "waveRevision",
+        ]) &&
+        isNonNegativeInteger(value.enemyCount) &&
+        isNonNegativeInteger(value.spawnSeed) &&
+        value.spawnSeed <= 0xffff_ffff &&
+        isNonNegativeInteger(value.tick) &&
+        (value.waveKind === "standard" || value.waveKind === "supply" || value.waveKind === "boss") &&
+        isNonNegativeInteger(value.waveNumber) && value.waveNumber > 0 &&
+        isNonNegativeInteger(value.waveRevision)
+      );
+    case "combat.wave_completed":
+      return (
+        hasExactKeys(value, ["type", "breakEndsAtTick", "tick", "waveNumber", "waveRevision"]) &&
+        isNonNegativeInteger(value.breakEndsAtTick) &&
+        isNonNegativeInteger(value.tick) &&
+        isNonNegativeInteger(value.waveNumber) && value.waveNumber > 0 &&
+        isNonNegativeInteger(value.waveRevision)
       );
     default:
       return false;

@@ -160,6 +160,10 @@ function isGameEvent(value: unknown): value is GameEvent {
     case "combat.entity_killed":
     case "combat.death_cue":
     case "combat.entity_respawned":
+    case "combat.enemy_spawned":
+    case "combat.enemy_despawned":
+    case "combat.wave_started":
+    case "combat.wave_completed":
       return isCombatEvent(value);
     default:
       return false;

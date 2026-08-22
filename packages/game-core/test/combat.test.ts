@@ -7,8 +7,10 @@ import {
   advanceGameSimulation,
   createInitialGameState,
   isValidMovementTransition,
+  predictSurvivorMovementTick,
   reduceGameCommand,
   type CombatEvent,
+  type CombatState,
   type CombatSurvivorState,
   type GameCommand,
   type GameState,
@@ -49,8 +51,17 @@ function startedState(seed = "combat-test-seed"): GameState {
   state = accepted(dispatch(state, "join", { type: "player.join", displayName: "Player" }));
   state = accepted(dispatch(state, "ready", { type: "player.ready", ready: true }));
   state = accepted(dispatch(state, "start", { type: "room.start" }));
+  state = advanceGameSimulation(state).state;
   expect(state.combat).not.toBeNull();
   return state;
+}
+
+function firstEnemy(combat: CombatState) {
+  const enemy = Object.values(combat.enemies).sort((left, right) => (
+    left.entityId.localeCompare(right.entityId)
+  ))[0];
+  if (enemy === undefined) throw new Error("Missing enemy");
+  return enemy;
 }
 
 function aimAt(
@@ -135,6 +146,26 @@ describe("P1 authoritative combat", () => {
     expect(isValidMovementTransition(survivor, teleported, COMBAT_TICK_MS)).toBe(false);
   });
 
+  it("rejects peer-authored hit and kill claims that are not combat intents", () => {
+    const state = startedState();
+    const before = state.combat;
+    if (before === null) throw new Error("Missing combat");
+    const enemy = firstEnemy(before);
+    const forgedKill = dispatch(state, "forged-kill", {
+      type: "combat.entity_killed",
+      entityId: enemy.entityId,
+      entityKind: "thrall",
+      killerPlayerId: PLAYER_ID,
+      tick: before.tick,
+    } as unknown as GameCommand);
+
+    expect(forgedKill).toMatchObject({
+      accepted: false,
+      error: { code: "INVALID_COMMAND" },
+    });
+    expect(forgedKill.state.combat).toBe(before);
+  });
+
   it("enforces acceleration while integrating accepted input at 30 Hz", () => {
     let state = startedState();
     const timeMs = Math.floor(state.combat?.timeMs ?? 0);
@@ -159,6 +190,33 @@ describe("P1 authoritative combat", () => {
       );
       expect(isValidMovementTransition(before, after, COMBAT_TICK_MS)).toBe(true);
     }
+  });
+
+  it("uses the Host movement integrator for one-tick client prediction", () => {
+    let state = startedState();
+    const survivor = state.combat?.survivors[PLAYER_ID];
+    if (survivor === undefined) {
+      throw new Error("Missing survivor");
+    }
+    const input = {
+      aimPitch: 0.12,
+      aimYaw: 0.75,
+      clientTimeMs: Math.floor(state.combat?.timeMs ?? 0),
+      moveForward: 0.8,
+      moveRight: -0.2,
+      sequence: 1,
+    };
+    const map = state.combat?.map;
+    if (map === undefined) throw new Error("Missing map");
+    const predicted = predictSurvivorMovementTick(survivor, input, map);
+    state = accepted(dispatch(state, "predicted-input", { type: "combat.input", ...input }));
+    state = advanceGameSimulation(state).state;
+
+    expect(state.combat?.survivors[PLAYER_ID]).toMatchObject({
+      input,
+      position: predicted.position,
+      velocity: predicted.velocity,
+    });
   });
 
   it("makes repeated command ids idempotent and rejects repeated input sequences", () => {
@@ -212,11 +270,12 @@ describe("P1 authoritative combat", () => {
     if (combat === null) {
       throw new Error("Missing combat");
     }
-    const historicalPosition = combat.thrall.position;
+    const enemy = firstEnemy(combat);
+    const historicalPosition = enemy.position;
     const shotTimeMs = Math.floor(combat.timeMs);
     state = aimAt(state, historicalPosition, 1);
     state = advanceGameSimulation(state, 5).state;
-    expect(state.combat?.thrall.position).not.toEqual(historicalPosition);
+    expect(state.combat?.enemies[enemy.entityId]?.position).not.toEqual(historicalPosition);
 
     const fired = dispatch(state, "delayed-shot", {
       type: "combat.fire",
@@ -230,8 +289,68 @@ describe("P1 authoritative combat", () => {
       rewindClamped: false,
     }));
     if (fired.accepted) {
-      expect(fired.state.combat?.thrall.hp).toBe(50);
+      expect(fired.state.combat?.enemies[enemy.entityId]?.hp).toBe(50);
     }
+  });
+
+  it("rejects over-rate fire without consuming ammunition or applying damage", () => {
+    let state = startedState();
+    const combat = state.combat;
+    if (combat === null) {
+      throw new Error("Missing combat");
+    }
+    const enemy = firstEnemy(combat);
+    state = aimAt(state, enemy.position, 1);
+    const first = dispatch(state, "rate-shot-1", {
+      type: "combat.fire",
+      clientShotTimeMs: Math.floor(combat.timeMs),
+      shotSequence: 1,
+    });
+    state = accepted(first);
+    const ammoAfterFirst = state.combat?.survivors[PLAYER_ID]?.rifle.ammo;
+    const hpAfterFirst = state.combat?.enemies[enemy.entityId]?.hp;
+
+    const second = dispatch(state, "rate-shot-2", {
+      type: "combat.fire",
+      clientShotTimeMs: Math.floor(state.combat?.timeMs ?? 0),
+      shotSequence: 2,
+    });
+
+    expect(second).toMatchObject({ accepted: false, error: { code: "WEAPON_UNAVAILABLE" } });
+    expect(second.state.combat?.survivors[PLAYER_ID]?.rifle.ammo).toBe(ammoAfterFirst);
+    expect(second.state.combat?.enemies[enemy.entityId]?.hp).toBe(hpAfterFirst);
+    expect(second.events).toEqual([]);
+  });
+
+  it("rejects firing an empty rifle without mutating authoritative combat state", () => {
+    const state = startedState();
+    const combat = state.combat;
+    const survivor = combat?.survivors[PLAYER_ID];
+    if (combat === null || combat === undefined || survivor === undefined) {
+      throw new Error("Missing combat fixture");
+    }
+    const emptyState: GameState = {
+      ...state,
+      combat: {
+        ...combat,
+        survivors: {
+          ...combat.survivors,
+          [PLAYER_ID]: { ...survivor, rifle: { ...survivor.rifle, ammo: 0 } },
+        },
+      },
+    };
+
+    const fired = dispatch(emptyState, "empty-shot", {
+      type: "combat.fire",
+      clientShotTimeMs: Math.floor(combat.timeMs),
+      shotSequence: 1,
+    });
+
+    expect(fired).toMatchObject({ accepted: false, error: { code: "WEAPON_UNAVAILABLE" } });
+    expect(fired.state).toBe(emptyState);
+    expect(fired.state.combat?.survivors[PLAYER_ID]?.rifle.ammo).toBe(0);
+    const enemy = firstEnemy(combat);
+    expect(fired.state.combat?.enemies[enemy.entityId]?.hp).toBe(enemy.hp);
   });
 
   it("clamps an over-old shot to bounded history without trusting its target", () => {
@@ -241,7 +360,7 @@ describe("P1 authoritative combat", () => {
     if (combat === null) {
       throw new Error("Missing combat");
     }
-    state = aimAt(state, combat.thrall.position, 1);
+    state = aimAt(state, firstEnemy(combat).position, 1);
     const fired = dispatch(state, "old-shot", {
       type: "combat.fire",
       clientShotTimeMs: 0,
@@ -258,13 +377,14 @@ describe("P1 authoritative combat", () => {
     );
   });
 
-  it("owns damage, kill, no-gore cue, Thrall respawn, and rifle reload on the server", () => {
+  it("owns damage, kill, no-gore cue, enemy despawn, and rifle reload on the server", () => {
     let state = startedState();
     let combat = state.combat;
     if (combat === null) {
       throw new Error("Missing combat");
     }
-    state = aimAt(state, combat.thrall.position, 1);
+    const enemy = firstEnemy(combat);
+    state = aimAt(state, enemy.position, 1);
     let fired = dispatch(state, "shot-1", {
       type: "combat.fire",
       clientShotTimeMs: Math.floor(combat.timeMs),
@@ -276,7 +396,7 @@ describe("P1 authoritative combat", () => {
     if (combat === null) {
       throw new Error("Missing combat");
     }
-    state = aimAt(state, combat.thrall.position, 2);
+    state = aimAt(state, state.combat?.enemies[enemy.entityId]?.position ?? enemy.position, 2);
     fired = dispatch(state, "shot-2", {
       type: "combat.fire",
       clientShotTimeMs: Math.floor(combat.timeMs),
@@ -285,20 +405,21 @@ describe("P1 authoritative combat", () => {
     const events = eventsOf(fired);
     expect(events).toContainEqual(expect.objectContaining({
       type: "combat.entity_killed",
-      entityId: "thrall-0",
+      entityId: enemy.entityId,
       killerPlayerId: PLAYER_ID,
     }));
     const deathCue = events.find((event) => event.type === "combat.death_cue");
     expect(deathCue).toEqual(expect.objectContaining({
       type: "combat.death_cue",
       biome: "house",
-      entityId: "thrall-0",
+      entityId: enemy.entityId,
     }));
     expect(JSON.stringify(deathCue)).not.toMatch(/blood|gore|corpse|fragment|shard/i);
 
     state = accepted(fired);
-    state = advanceGameSimulation(state, COMBAT_RULES.thrallRespawnTicks).state;
-    expect(state.combat?.thrall).toMatchObject({ alive: true, generation: 1, hp: 100 });
+    state = advanceGameSimulation(state, 18).state;
+    expect(state.combat?.enemies[enemy.entityId]).toBeUndefined();
+    expect(state.combat?.enemyTombstones[enemy.entityId]).toBeDefined();
 
     // Two shots consumed ammunition; reload completion is simulation-owned.
     state = accepted(dispatch(state, "reload", { type: "combat.reload" }));
@@ -318,12 +439,20 @@ describe("P1 authoritative combat", () => {
     if (combat === null || combat === undefined || survivor === undefined) {
       throw new Error("Missing combat fixture");
     }
+    const enemy = firstEnemy(combat);
     state = {
       ...state,
       combat: {
         ...combat,
         survivors: { ...combat.survivors, [PLAYER_ID]: { ...survivor, hp: 8 } },
-        thrall: { ...combat.thrall, attackReadyTick: combat.tick, position: { x: 0, z: 1 } },
+        enemies: {
+          ...combat.enemies,
+          [enemy.entityId]: {
+            ...enemy,
+            attackReadyTick: combat.tick,
+            position: { x: survivor.position.x, z: survivor.position.z + 1 },
+          },
+        },
       },
     };
     const killed = advanceGameSimulation(state);

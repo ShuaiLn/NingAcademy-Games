@@ -21,10 +21,11 @@ export class WebRtcRemoteAuthorityTransport implements RemoteAuthorityTransport 
   readonly #unsubscribe: () => void;
   readonly #unsubscribeRealtime: () => void;
   #closed = false;
-  #snapshot: GameState | null = null;
+  #snapshot: Readonly<GameState> | null = null;
 
   constructor(private readonly network: WebRtcStarNetwork) {
     if (network.isHost) throw new Error("remote transport is only for non-host peers");
+    this.#snapshot = network.getLatestGameState();
     this.#unsubscribe = network.subscribeControl((message) => {
       if (message.messageType === "game.command_result") {
         const pending = this.#pending.get(message.result.ack.commandId);
@@ -38,6 +39,7 @@ export class WebRtcRemoteAuthorityTransport implements RemoteAuthorityTransport 
     });
     this.#unsubscribeRealtime = network.subscribeRealtime((message) => {
       if (message.messageType === "game.snapshot" && message.roomId === network.roomId) {
+        if (this.#snapshot !== null && message.state.revision <= this.#snapshot.revision) return;
         this.#snapshot = message.state;
       }
     });

@@ -1,4 +1,4 @@
-import { createInitialGameState } from "@ningacademy/game-core";
+import { createCombatState, createInitialGameState } from "@ningacademy/game-core";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -23,6 +23,7 @@ describe("WebRTC packet contract", () => {
       revision: state.revision,
       roomId: state.roomId,
       state,
+      topologyEpoch: 1,
     });
     expect(decodeP2PRealtimePacket(packet)).toMatchObject({ messageType: "game.snapshot" });
     expect(decodeP2PControlPacket(JSON.stringify({
@@ -34,5 +35,41 @@ describe("WebRTC packet contract", () => {
 
   it("rejects oversized packets before JSON decoding", () => {
     expect(decodeP2PControlPacket("x".repeat(MAX_P2P_PACKET_BYTES + 1))).toBeNull();
+  });
+
+  it("requires topology epoch and rejects a divergent deterministic map hash", () => {
+    const state = createInitialGameState({
+      nowMs: 1,
+      roomId: "room-1",
+      rulesetVersion: "p0",
+      seed: "seed",
+    });
+    expect(decodeP2PRealtimePacket(JSON.stringify({
+      messageType: "game.snapshot",
+      protocolVersion: PROTOCOL_VERSION,
+      revision: state.revision,
+      roomId: state.roomId,
+      state,
+    }))).toBeNull();
+
+    const combat = createCombatState({
+      biome: "house",
+      playerIds: ["host"],
+      seed: "seed",
+      startedAtMs: 1,
+    });
+    const corruptState = {
+      ...state,
+      combat: { ...combat, map: { ...combat.map, layoutHash: "fnv1a32:00000000" } },
+      status: "running" as const,
+    };
+    expect(decodeP2PRealtimePacket(JSON.stringify({
+      messageType: "game.snapshot",
+      protocolVersion: PROTOCOL_VERSION,
+      revision: corruptState.revision,
+      roomId: corruptState.roomId,
+      state: corruptState,
+      topologyEpoch: 1,
+    }))).toBeNull();
   });
 });

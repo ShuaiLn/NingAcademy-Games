@@ -63,22 +63,45 @@ test("an eight-player room uses one Host-to-peer connection per peer", async ({ 
           else channel.onopen = () => resolve();
         })));
         link.reliable.send(`control-ready-${index}`);
-        link.realtime.send(`snapshot-ready-${index}`);
+        link.realtime.send(JSON.stringify({
+          enemyIds: ["thrall:w1:e0:a1", "thrall:w1:e1:b2", "thrall:w1:e2:c3"],
+          layoutHash: "fnv1a32:p6-greybox",
+          messageType: "game.snapshot",
+          revision: 42,
+          roomId: "eight-player-p6",
+          topologyEpoch: 7,
+          wave: { enemiesRemaining: 3, phase: "combat", revision: 5, waveNumber: 1 },
+        }));
       }, { index: peerIndex, remoteAnswer: answer });
     }
 
+    const peerWorldViews: unknown[] = [];
     for (let peerIndex = 0; peerIndex < peers.length; peerIndex += 1) {
       const peer = peers[peerIndex]!;
       await expect.poll(() => peer.evaluate(() => (
         globalThis as unknown as { testMessages: string[] }
-      ).testMessages.slice().sort())).toEqual([
-        `control-ready-${peerIndex}`,
-        `snapshot-ready-${peerIndex}`,
-      ]);
+      ).testMessages.length)).toBe(2);
+      const messages = await peer.evaluate(() => (
+        globalThis as unknown as { testMessages: string[] }
+      ).testMessages.slice());
+      expect(messages).toContain(`control-ready-${peerIndex}`);
+      const snapshotMessage = messages.find((message) => message.startsWith("{"));
+      expect(snapshotMessage).toBeDefined();
+      peerWorldViews.push(JSON.parse(snapshotMessage!));
       await expect(peer.evaluate(() => (
         globalThis as unknown as { testPeerPc: RTCPeerConnection }
       ).testPeerPc.connectionState)).resolves.toBe("connected");
     }
+
+    expect(peerWorldViews).toHaveLength(7);
+    expect(peerWorldViews.every((world) => JSON.stringify(world) === JSON.stringify(peerWorldViews[0])))
+      .toBe(true);
+    expect(peerWorldViews[0]).toMatchObject({
+      enemyIds: ["thrall:w1:e0:a1", "thrall:w1:e1:b2", "thrall:w1:e2:c3"],
+      messageType: "game.snapshot",
+      topologyEpoch: 7,
+      wave: { enemiesRemaining: 3, phase: "combat", waveNumber: 1 },
+    });
 
     expect(await host.evaluate(() => (
       globalThis as unknown as { testHostLinks: unknown[] }

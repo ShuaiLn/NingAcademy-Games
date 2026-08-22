@@ -109,6 +109,7 @@ export function createStartedCombatFixture(): StartedCombatFixture {
     ready: true,
   }).state;
   state = applyTestUserCommand(state, TEST_USERS.alice.userId, { type: "room.start" }).state;
+  state = advanceGameSimulation(state).state;
   return { playerId: TEST_USERS.alice.userId, state };
 }
 

@@ -325,7 +325,7 @@ a {
 
 .combat-hud {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   border-bottom: 1px solid rgb(143 155 194 / 18%);
   background: rgb(5 10 24 / 92%);
 }
@@ -754,6 +754,81 @@ a {
   background: rgb(4 9 22 / 48%);
 }
 
+.multiplayer-game-shell {
+  margin-bottom: 18px;
+}
+
+.multiplayer-game-heading {
+  display: flex;
+  min-height: 78px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 17px;
+  border-bottom: 1px solid rgb(143 155 194 / 18%);
+  background: linear-gradient(100deg, rgb(9 17 38 / 98%), rgb(22 18 61 / 92%));
+}
+
+.multiplayer-game-heading h2,
+.multiplayer-game-heading p {
+  margin: 0;
+}
+
+.multiplayer-game-heading h2 {
+  margin-top: 3px;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+.multiplayer-game-heading button {
+  padding: 8px 12px;
+  border: 1px solid #7067ce;
+  border-radius: 8px;
+  background: #241e55;
+  color: #fff;
+  cursor: pointer;
+}
+
+.multiplayer-arena-frame {
+  height: min(72vh, 720px);
+}
+
+.multiplayer-authority-note {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-top: 1px solid rgb(143 155 194 / 16%);
+  background: #07101e;
+  color: #8291aa;
+  font-size: 0.68rem;
+}
+
+.multiplayer-authority-note strong {
+  color: #7ee5b2;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.multiplayer-authority-note .network-error {
+  margin-left: auto;
+}
+
+.arena-command-error {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  max-width: min(90%, 620px);
+  padding: 8px 12px;
+  border: 1px solid rgb(255 123 139 / 42%);
+  border-radius: 9px;
+  background: rgb(54 11 26 / 86%);
+  color: #ffb2ad;
+  font-size: 0.7rem;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
 .section-divider {
   display: flex;
   align-items: center;
@@ -807,6 +882,20 @@ a {
   .room-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .multiplayer-game-heading,
+  .multiplayer-authority-note {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .multiplayer-game-heading .room-meta {
+    align-items: flex-start;
+  }
+
+  .multiplayer-authority-note .network-error {
+    margin-left: 0;
   }
 
   .member-list li {

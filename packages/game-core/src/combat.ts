@@ -1,4 +1,16 @@
-import { createRandomState, nextFloat, nextUint32 } from "./prng.js";
+import { createRandomState, nextUint32 } from "./prng.js";
+import {
+  createDeterministicGreyboxMap,
+  moveWithinCombatMap,
+  type CombatMapLayout,
+} from "./map-layout.js";
+import {
+  WAVE_DIRECTOR_RULES,
+  createScheduledThrall,
+  createWaveDirectorState,
+  despawnEnemyFromCollection,
+  spawnEnemyIntoCollection,
+} from "./wave-director.js";
 import {
   COMBAT_REWIND_WINDOW_MS,
   COMBAT_TICK_MS,
@@ -8,7 +20,6 @@ import {
   type CombatEvent,
   type CombatHistoryFrame,
   type CombatHistorySurvivor,
-  type CombatHistoryThrall,
   type CombatReduction,
   type CombatRuleErrorCode,
   type CombatSimulationResult,
@@ -16,11 +27,12 @@ import {
   type CombatSurvivorState,
   type CombatVector2,
   type QuantizedCombatPosition,
+  type SurvivorInputState,
   type ThrallState,
+  type WaveDirectorState,
 } from "./combat-types.js";
 
 export const COMBAT_RULES = {
-  arenaHalfExtent: 20,
   historyMs: COMBAT_REWIND_WINDOW_MS,
   inputExpiryMs: 1_000,
   maxAimPitch: 1.35,
@@ -32,6 +44,7 @@ export const COMBAT_RULES = {
   survivorAcceleration: 24,
   survivorEyeHeight: 1.6,
   survivorMaxSpeed: 5,
+  survivorRadius: 0.4,
   survivorRespawnTicks: 60,
   thrallAttackDamage: 8,
   thrallAttackIntervalTicks: 24,
@@ -39,13 +52,12 @@ export const COMBAT_RULES = {
   thrallCoreHeight: 1.05,
   thrallHitRadius: 0.8,
   thrallMaxHp: 100,
-  thrallRespawnTicks: 30,
+  thrallRadius: 0.8,
   thrallSpeed: 2.4,
 } as const;
 
 const POSITION_QUANTIZATION = 1_000;
 const DEATH_CUE_CENTIMETERS = 100;
-const THRALL_ID = "thrall-0";
 
 function exactKeys(value: object, keys: readonly string[]): boolean {
   const actual = Object.keys(value);
@@ -114,35 +126,13 @@ function clamp(value: number, minimum: number, maximum: number): number {
   return Math.min(maximum, Math.max(minimum, value));
 }
 
-function spawnThrall(
-  rng: CombatState["rng"],
-  generation: number,
-): { readonly rng: CombatState["rng"]; readonly thrall: ThrallState } {
-  const angleDraw = nextFloat(rng);
-  const radiusDraw = nextFloat(angleDraw.state);
-  const angle = angleDraw.value * Math.PI * 2;
-  const radius = 8 + radiusDraw.value * 4;
-
-  return {
-    rng: radiusDraw.state,
-    thrall: {
-      alive: true,
-      attackReadyTick: 0,
-      generation,
-      hp: COMBAT_RULES.thrallMaxHp,
-      id: THRALL_ID,
-      maxHp: COMBAT_RULES.thrallMaxHp,
-      position: quantizeVector({ x: Math.sin(angle) * radius, z: Math.cos(angle) * radius }),
-      respawnAtTick: null,
-    },
-  };
-}
-
-function initialSurvivor(playerId: string, index: number, count: number): CombatSurvivorState {
-  const angle = count <= 1 ? 0 : (index / count) * Math.PI * 2;
-  const position = count <= 1
-    ? { x: 0, z: 0 }
-    : { x: Math.sin(angle) * 1.5, z: Math.cos(angle) * 1.5 };
+function initialSurvivor(
+  playerId: string,
+  index: number,
+  layout: CombatMapLayout,
+): CombatSurvivorState {
+  const spawnPointIndex = index % layout.playerSpawnPoints.length;
+  const position = layout.playerSpawnPoints[spawnPointIndex] ?? layout.playerSpawnZone.center;
 
   return {
     alive: true,
@@ -159,6 +149,7 @@ function initialSurvivor(playerId: string, index: number, count: number): Combat
       nextFireTick: 0,
       reloadCompleteTick: null,
     },
+    spawnPointIndex,
     velocity: { x: 0, z: 0 },
     input: {
       aimPitch: 0,
@@ -177,13 +168,14 @@ function historyFrame(state: Omit<CombatState, "history">): CombatHistoryFrame {
     survivors[playerId] = { alive: survivor.alive, position: survivor.position };
   }
 
+  const enemies = Object.fromEntries(Object.entries(state.enemies).map(([entityId, enemy]) => [
+    entityId,
+    { alive: enemy.alive, position: enemy.position },
+  ]));
+
   return {
+    enemies,
     survivors,
-    thrall: {
-      alive: state.thrall.alive,
-      generation: state.thrall.generation,
-      position: state.thrall.position,
-    },
     tick: state.tick,
     timeMs: state.timeMs,
   };
@@ -209,20 +201,25 @@ export function createCombatState(options: CreateCombatStateOptions): CombatStat
     throw new RangeError("Combat player ids must be unique");
   }
 
+  const map = createDeterministicGreyboxMap(options.seed);
   const survivors: Record<string, CombatSurvivorState> = {};
   uniquePlayerIds.forEach((playerId, index) => {
-    survivors[playerId] = initialSurvivor(playerId, index, uniquePlayerIds.length);
+    survivors[playerId] = initialSurvivor(playerId, index, map);
   });
 
-  const spawn = spawnThrall(createRandomState(options.seed), 0);
+  const waveCreation = createWaveDirectorState(createRandomState(options.seed), 1, 0);
   const withoutHistory = {
     biome: options.biome,
-    rng: spawn.rng,
+    enemies: {},
+    enemyRevision: 0,
+    enemyTombstones: {},
+    map,
+    rng: waveCreation.rng,
     startedAtMs: options.startedAtMs,
     survivors,
-    thrall: spawn.thrall,
     tick: 0,
     timeMs: options.startedAtMs,
+    wave: waveCreation.wave,
   };
 
   return { ...withoutHistory, history: [historyFrame(withoutHistory)] };
@@ -232,10 +229,24 @@ export function createCombatStartedEvent(state: CombatState): CombatEvent {
   return {
     type: "combat.started",
     biome: state.biome,
+    canonicalLayoutId: state.map.canonicalLayoutId,
+    enemyIds: Object.keys(state.enemies),
+    layoutHash: state.map.layoutHash,
     seed: state.rng.seed,
-    thrallId: state.thrall.id,
-    thrallPosition: state.thrall.position,
     tickRate: COMBAT_TICK_RATE,
+    waveNumber: state.wave.waveNumber,
+  };
+}
+
+export function createWaveStartedEvent(state: CombatState): CombatEvent {
+  return {
+    type: "combat.wave_started",
+    enemyCount: state.wave.enemiesRemaining,
+    spawnSeed: state.wave.spawnSeed,
+    tick: state.tick,
+    waveKind: state.wave.waveKind,
+    waveNumber: state.wave.waveNumber,
+    waveRevision: state.wave.revision,
   };
 }
 
@@ -325,8 +336,8 @@ function interpolateVector(
 }
 
 interface HistoricalSample {
+  readonly enemies: Readonly<Record<string, { readonly alive: boolean; readonly position: CombatVector2 }>>;
   readonly survivor: CombatHistorySurvivor | null;
-  readonly thrall: CombatHistoryThrall;
 }
 
 function sampleHistory(
@@ -366,26 +377,38 @@ function sampleHistory(
         alive: leftSurvivor.alive && rightSurvivor.alive,
         position: interpolateVector(leftSurvivor.position, rightSurvivor.position, amount),
       };
-  const sameGeneration = left.thrall.generation === right.thrall.generation;
+  const enemies: Record<string, { readonly alive: boolean; readonly position: CombatVector2 }> = {};
+  const enemyIds = new Set([...Object.keys(left.enemies), ...Object.keys(right.enemies)]);
+  for (const entityId of enemyIds) {
+    const leftEnemy = left.enemies[entityId];
+    const rightEnemy = right.enemies[entityId];
+    if (rightEnemy === undefined) continue;
+    if (leftEnemy === undefined) {
+      // Client shot times are integer milliseconds while the 30 Hz host clock
+      // advances fractionally. Once the Host has spawned an entity, allow the
+      // immediately preceding sub-millisecond sample to see that spawn. Never
+      // do the inverse for a right-frame despawn, which would resurrect it.
+      enemies[entityId] = rightEnemy;
+      continue;
+    }
+    enemies[entityId] = {
+      alive: leftEnemy.alive && rightEnemy.alive,
+      position: interpolateVector(leftEnemy.position, rightEnemy.position, amount),
+    };
+  }
 
   return {
+    enemies,
     survivor,
-    thrall: {
-      alive: sameGeneration && left.thrall.alive && right.thrall.alive,
-      generation: sameGeneration ? left.thrall.generation : right.thrall.generation,
-      position: sameGeneration
-        ? interpolateVector(left.thrall.position, right.thrall.position, amount)
-        : right.thrall.position,
-    },
   };
 }
 
-function rayHitsThrall(
+function rayHitDistance(
   origin: CombatVector2,
   aimYaw: number,
   aimPitch: number,
   target: CombatVector2,
-): boolean {
+): number | null {
   const cosPitch = Math.cos(aimPitch);
   const direction = {
     x: Math.sin(aimYaw) * cosPitch,
@@ -400,12 +423,12 @@ function rayHitsThrall(
   const projection =
     toTarget.x * direction.x + toTarget.y * direction.y + toTarget.z * direction.z;
   if (projection < 0 || projection > COMBAT_RULES.rifleRange) {
-    return false;
+    return null;
   }
 
   const perpendicularSquared =
     toTarget.x ** 2 + toTarget.y ** 2 + toTarget.z ** 2 - projection ** 2;
-  return perpendicularSquared <= COMBAT_RULES.thrallHitRadius ** 2;
+  return perpendicularSquared <= COMBAT_RULES.thrallHitRadius ** 2 ? projection : null;
 }
 
 function deathCuePosition(position: CombatVector2, entityKind: "survivor" | "thrall"): QuantizedCombatPosition {
@@ -447,17 +470,27 @@ function reduceFire(
   const evaluatedAtMs = clamp(command.clientShotTimeMs, earliestHistoryMs, state.timeMs);
   const rewindClamped = evaluatedAtMs !== command.clientShotTimeMs;
   const sample = sampleHistory(state.history, playerId, evaluatedAtMs);
-  const hit =
-    sample.survivor?.alive === true &&
-    state.thrall.alive &&
-    sample.thrall.alive &&
-    sample.thrall.generation === state.thrall.generation &&
-    rayHitsThrall(
-      sample.survivor.position,
-      survivor.input.aimYaw,
-      survivor.input.aimPitch,
-      sample.thrall.position,
-    );
+  let targetEntityId: string | null = null;
+  let targetDistance = Number.POSITIVE_INFINITY;
+  if (sample.survivor?.alive === true) {
+    for (const [entityId, historicalEnemy] of Object.entries(sample.enemies)) {
+      if (!historicalEnemy.alive || state.enemies[entityId]?.alive !== true) continue;
+      const distance = rayHitDistance(
+        sample.survivor.position,
+        survivor.input.aimYaw,
+        survivor.input.aimPitch,
+        historicalEnemy.position,
+      );
+      if (
+        distance !== null
+        && (distance < targetDistance || (distance === targetDistance && entityId < (targetEntityId ?? "\uffff")))
+      ) {
+        targetDistance = distance;
+        targetEntityId = entityId;
+      }
+    }
+  }
+  const hit = targetEntityId !== null;
   const rifle = {
     ...survivor.rifle,
     ammo: survivor.rifle.ammo - 1,
@@ -479,33 +512,43 @@ function reduceFire(
       shotSequence: command.shotSequence,
     },
   ];
-  let nextThrall = state.thrall;
+  let nextEnemies = state.enemies;
+  let enemyRevision = state.enemyRevision;
   let nextRng = state.rng;
 
-  if (hit) {
-    const hp = Math.max(0, state.thrall.hp - COMBAT_RULES.rifleDamage);
-    nextThrall = { ...state.thrall, hp };
+  if (targetEntityId !== null) {
+    const target = state.enemies[targetEntityId];
+    if (target === undefined) throw new Error("Historical target disappeared from authoritative state");
+    const hp = Math.max(0, target.hp - COMBAT_RULES.rifleDamage);
+    let nextTarget: ThrallState = {
+      ...target,
+      animationRevision: target.animationRevision + 1,
+      animationState: hp === 0 ? "dead" : "hit",
+      animationUntilTick: hp === 0 ? null : state.tick + 6,
+      hp,
+      velocity: hp === 0 ? { x: 0, z: 0 } : target.velocity,
+    };
     events.push({
       type: "combat.entity_damaged",
       amount: COMBAT_RULES.rifleDamage,
       remainingHp: hp,
       sourceEntityId: playerId,
-      targetEntityId: state.thrall.id,
+      targetEntityId,
     });
 
     if (hp === 0) {
       const cueSeed = nextUint32(state.rng);
       nextRng = cueSeed.state;
-      nextThrall = {
-        ...nextThrall,
+      nextTarget = {
+        ...nextTarget,
         alive: false,
-        respawnAtTick: state.tick + COMBAT_RULES.thrallRespawnTicks,
+        despawnAtTick: state.tick + WAVE_DIRECTOR_RULES.enemyDespawnTicks,
       };
       nextSurvivor = { ...nextSurvivor, kills: nextSurvivor.kills + 1 };
       events.push(
         {
           type: "combat.entity_killed",
-          entityId: state.thrall.id,
+          entityId: targetEntityId,
           entityKind: "thrall",
           killerPlayerId: playerId,
           tick: state.tick,
@@ -513,12 +556,14 @@ function reduceFire(
         {
           type: "combat.death_cue",
           biome: state.biome,
-          entityId: state.thrall.id,
-          pos: deathCuePosition(state.thrall.position, "thrall"),
+          entityId: targetEntityId,
+          pos: deathCuePosition(target.position, "thrall"),
           seed: cueSeed.value,
         },
       );
     }
+    nextEnemies = { ...state.enemies, [targetEntityId]: nextTarget };
+    enemyRevision += 1;
   }
 
   return {
@@ -526,9 +571,10 @@ function reduceFire(
     events,
     state: {
       ...state,
+      enemies: nextEnemies,
+      enemyRevision,
       rng: nextRng,
       survivors: { ...state.survivors, [playerId]: nextSurvivor },
-      thrall: nextThrall,
     },
   };
 }
@@ -588,21 +634,10 @@ function moveToward(current: number, target: number, maximumDelta: number): numb
   return current + Math.sign(target - current) * maximumDelta;
 }
 
-function stepSurvivor(survivor: CombatSurvivorState, tick: number): CombatSurvivorState {
-  if (!survivor.alive) {
-    if (survivor.respawnAtTick !== null && tick >= survivor.respawnAtTick) {
-      return {
-        ...survivor,
-        alive: true,
-        hp: survivor.maxHp,
-        position: { x: 0, z: 0 },
-        respawnAtTick: null,
-        velocity: { x: 0, z: 0 },
-      };
-    }
-    return survivor;
-  }
-
+function integrateSurvivorMovement(
+  survivor: CombatSurvivorState,
+  map: CombatMapLayout,
+): CombatSurvivorState {
   const sinYaw = Math.sin(survivor.input.aimYaw);
   const cosYaw = Math.cos(survivor.input.aimYaw);
   const desiredVelocity = {
@@ -625,32 +660,64 @@ function stepSurvivor(survivor: CombatSurvivorState, tick: number): CombatSurviv
         x: (velocity.x / speed) * COMBAT_RULES.survivorMaxSpeed,
         z: (velocity.z / speed) * COMBAT_RULES.survivorMaxSpeed,
       });
-  const position = quantizeVector({
-    x: clamp(
-      survivor.position.x + boundedVelocity.x / COMBAT_TICK_RATE,
-      -COMBAT_RULES.arenaHalfExtent,
-      COMBAT_RULES.arenaHalfExtent,
-    ),
-    z: clamp(
-      survivor.position.z + boundedVelocity.z / COMBAT_TICK_RATE,
-      -COMBAT_RULES.arenaHalfExtent,
-      COMBAT_RULES.arenaHalfExtent,
-    ),
-  });
+  const position = quantizeVector(moveWithinCombatMap(
+    map,
+    survivor.position,
+    {
+      x: boundedVelocity.x / COMBAT_TICK_RATE,
+      z: boundedVelocity.z / COMBAT_TICK_RATE,
+    },
+    COMBAT_RULES.survivorRadius,
+  ));
+
+  return { ...survivor, position, velocity: boundedVelocity };
+}
+
+/**
+ * Presentation-only movement prediction using the exact Host integrator.
+ * Damage, HP, ammo, respawn and hit confirmation remain authoritative.
+ */
+export function predictSurvivorMovementTick(
+  survivor: CombatSurvivorState,
+  input: SurvivorInputState,
+  map: CombatMapLayout,
+): CombatSurvivorState {
+  if (!survivor.alive) return survivor;
+  return integrateSurvivorMovement({ ...survivor, input }, map);
+}
+
+function stepSurvivor(
+  survivor: CombatSurvivorState,
+  tick: number,
+  map: CombatMapLayout,
+): CombatSurvivorState {
+  if (!survivor.alive) {
+    if (survivor.respawnAtTick !== null && tick >= survivor.respawnAtTick) {
+      return {
+        ...survivor,
+        alive: true,
+        hp: survivor.maxHp,
+        position: map.playerSpawnPoints[survivor.spawnPointIndex] ?? map.playerSpawnZone.center,
+        respawnAtTick: null,
+        velocity: { x: 0, z: 0 },
+      };
+    }
+    return survivor;
+  }
+
+  const moved = integrateSurvivorMovement(survivor, map);
   const reloadFinished =
     survivor.rifle.reloadCompleteTick !== null && tick >= survivor.rifle.reloadCompleteTick;
 
   return {
-    ...survivor,
-    position,
+    ...moved,
     rifle: reloadFinished
       ? {
           ...survivor.rifle,
           ammo: survivor.rifle.magazineSize,
           reloadCompleteTick: null,
-        }
+      }
       : survivor.rifle,
-    velocity: boundedVelocity,
   };
 }
 
@@ -668,7 +735,10 @@ function nearestSurvivor(
       survivor.position.x - position.x,
       survivor.position.z - position.z,
     );
-    if (distance < nearestDistance) {
+    if (
+      distance < nearestDistance
+      || (distance === nearestDistance && survivor.playerId < (nearest?.playerId ?? "\uffff"))
+    ) {
       nearest = survivor;
       nearestDistance = distance;
     }
@@ -676,8 +746,26 @@ function nearestSurvivor(
   return nearest;
 }
 
+function withEnemyAnimation(
+  enemy: ThrallState,
+  animationState: ThrallState["animationState"],
+  animationUntilTick: number | null,
+): ThrallState {
+  if (
+    enemy.animationState === animationState
+    && enemy.animationUntilTick === animationUntilTick
+  ) return enemy;
+  return {
+    ...enemy,
+    animationRevision: enemy.animationRevision + 1,
+    animationState,
+    animationUntilTick,
+  };
+}
+
 function stepThrall(
   state: CombatState,
+  enemy: ThrallState,
   survivors: Readonly<Record<string, CombatSurvivorState>>,
   tick: number,
 ): {
@@ -686,54 +774,64 @@ function stepThrall(
   readonly survivors: Readonly<Record<string, CombatSurvivorState>>;
   readonly thrall: ThrallState;
 } {
-  if (!state.thrall.alive) {
-    if (state.thrall.respawnAtTick !== null && tick >= state.thrall.respawnAtTick) {
-      const spawn = spawnThrall(state.rng, state.thrall.generation + 1);
-      return {
-        events: [{
-          type: "combat.entity_respawned",
-          entityId: spawn.thrall.id,
-          entityKind: "thrall",
-          position: spawn.thrall.position,
-          tick,
-        }],
-        rng: spawn.rng,
-        survivors,
-        thrall: { ...spawn.thrall, attackReadyTick: tick + 15 },
-      };
-    }
-    return { events: [], rng: state.rng, survivors, thrall: state.thrall };
-  }
+  if (!enemy.alive) return { events: [], rng: state.rng, survivors, thrall: enemy };
 
-  const target = nearestSurvivor(survivors, state.thrall.position);
+  const target = nearestSurvivor(survivors, enemy.position);
   if (target === null) {
-    return { events: [], rng: state.rng, survivors, thrall: state.thrall };
-  }
-  const offset = {
-    x: target.position.x - state.thrall.position.x,
-    z: target.position.z - state.thrall.position.z,
-  };
-  const distance = Math.hypot(offset.x, offset.z);
-  if (distance > COMBAT_RULES.thrallAttackRange) {
-    const stepDistance = Math.min(
-      distance - COMBAT_RULES.thrallAttackRange,
-      COMBAT_RULES.thrallSpeed / COMBAT_TICK_RATE,
-    );
     return {
       events: [],
       rng: state.rng,
       survivors,
-      thrall: {
-        ...state.thrall,
-        position: quantizeVector({
-          x: state.thrall.position.x + (offset.x / distance) * stepDistance,
-          z: state.thrall.position.z + (offset.z / distance) * stepDistance,
-        }),
-      },
+      thrall: withEnemyAnimation({ ...enemy, targetPlayerId: null, velocity: { x: 0, z: 0 } }, "idle", null),
     };
   }
-  if (tick < state.thrall.attackReadyTick) {
-    return { events: [], rng: state.rng, survivors, thrall: state.thrall };
+  const offset = {
+    x: target.position.x - enemy.position.x,
+    z: target.position.z - enemy.position.z,
+  };
+  const distance = Math.hypot(offset.x, offset.z);
+  if (distance > COMBAT_RULES.thrallAttackRange) {
+    const speedMultiplier = 1 + Math.min(0.5, (enemy.waveNumber - 1) * 0.05);
+    const stepDistance = Math.min(
+      distance - COMBAT_RULES.thrallAttackRange,
+      COMBAT_RULES.thrallSpeed * speedMultiplier / COMBAT_TICK_RATE,
+    );
+    const position = quantizeVector(moveWithinCombatMap(
+      state.map,
+      enemy.position,
+      { x: (offset.x / distance) * stepDistance, z: (offset.z / distance) * stepDistance },
+      COMBAT_RULES.thrallRadius,
+    ));
+    const moved = position.x !== enemy.position.x || position.z !== enemy.position.z;
+    const movingEnemy: ThrallState = {
+      ...enemy,
+      position,
+      targetPlayerId: target.playerId,
+      velocity: {
+        x: quantize((position.x - enemy.position.x) * COMBAT_TICK_RATE),
+        z: quantize((position.z - enemy.position.z) * COMBAT_TICK_RATE),
+      },
+    };
+    const holdingAnimation = enemy.animationUntilTick !== null && tick < enemy.animationUntilTick;
+    return {
+      events: [],
+      rng: state.rng,
+      survivors,
+      thrall: holdingAnimation
+        ? movingEnemy
+        : withEnemyAnimation(movingEnemy, moved ? "moving" : "idle", null),
+    };
+  }
+  if (tick < enemy.attackReadyTick) {
+    const waiting = { ...enemy, targetPlayerId: target.playerId, velocity: { x: 0, z: 0 } };
+    return {
+      events: [],
+      rng: state.rng,
+      survivors,
+      thrall: enemy.animationUntilTick !== null && tick < enemy.animationUntilTick
+        ? waiting
+        : withEnemyAnimation(waiting, "idle", null),
+    };
   }
 
   const hp = Math.max(0, target.hp - COMBAT_RULES.thrallAttackDamage);
@@ -750,7 +848,7 @@ function stepThrall(
     type: "combat.entity_damaged",
     amount: COMBAT_RULES.thrallAttackDamage,
     remainingHp: hp,
-    sourceEntityId: state.thrall.id,
+    sourceEntityId: enemy.entityId,
     targetEntityId: target.playerId,
   }];
   let nextRng = state.rng;
@@ -780,10 +878,12 @@ function stepThrall(
     events,
     rng: nextRng,
     survivors: nextSurvivors,
-    thrall: {
-      ...state.thrall,
+    thrall: withEnemyAnimation({
+      ...enemy,
       attackReadyTick: tick + COMBAT_RULES.thrallAttackIntervalTicks,
-    },
+      targetPlayerId: target.playerId,
+      velocity: { x: 0, z: 0 },
+    }, "attacking", tick + 10),
   };
 }
 
@@ -807,29 +907,130 @@ function survivorRespawnEvents(
   return events;
 }
 
+function reviseWave(
+  wave: WaveDirectorState,
+  patch: Partial<WaveDirectorState>,
+): WaveDirectorState {
+  return { ...wave, ...patch, revision: wave.revision + 1 };
+}
+
 export function advanceCombatTick(state: CombatState): CombatSimulationResult {
   const tick = state.tick + 1;
   const timeMs = state.startedAtMs + tick * COMBAT_TICK_MS;
   const survivors: Record<string, CombatSurvivorState> = {};
   for (const [playerId, survivor] of Object.entries(state.survivors)) {
-    survivors[playerId] = stepSurvivor(survivor, tick);
+    survivors[playerId] = stepSurvivor(survivor, tick, state.map);
   }
   const respawnEvents = survivorRespawnEvents(state.survivors, survivors, tick);
-  const thrallStep = stepThrall(state, survivors, tick);
+  const events: CombatEvent[] = [...respawnEvents];
+  let enemies = state.enemies;
+  let tombstones = state.enemyTombstones;
+  let enemyRevision = state.enemyRevision;
+  let wave = state.wave;
+  let nextRng = state.rng;
+
+  if (wave.phase === "break" && wave.breakEndsAtTick !== null && tick >= wave.breakEndsAtTick) {
+    const nextWave = createWaveDirectorState(nextRng, wave.waveNumber + 1, tick, wave.revision);
+    nextRng = nextWave.rng;
+    wave = nextWave.wave;
+    events.push({
+      type: "combat.wave_started",
+      enemyCount: wave.enemiesRemaining,
+      spawnSeed: wave.spawnSeed,
+      tick,
+      waveKind: wave.waveKind,
+      waveNumber: wave.waveNumber,
+      waveRevision: wave.revision,
+    });
+  }
+
+  let spawnCursor = wave.spawnCursor;
+  while (wave.phase === "spawning") {
+    const scheduled = wave.spawnSchedule[spawnCursor];
+    if (scheduled === undefined || scheduled.spawnAtTick > tick) break;
+    const enemy = createScheduledThrall(state.map, scheduled, wave, tick, COMBAT_RULES.thrallMaxHp);
+    const spawned = spawnEnemyIntoCollection(enemies, tombstones, enemy);
+    if (!spawned.accepted) {
+      throw new Error(`Host rejected scheduled enemy spawn: ${spawned.reason}`);
+    }
+    enemies = spawned.enemies;
+    spawnCursor += 1;
+    enemyRevision += 1;
+    events.push({
+      type: "combat.enemy_spawned",
+      entityId: enemy.entityId,
+      position: enemy.position,
+      spawnZoneId: enemy.spawnZoneId,
+      tick,
+      waveNumber: enemy.waveNumber,
+    });
+  }
+  if (spawnCursor !== wave.spawnCursor) wave = reviseWave(wave, { spawnCursor });
+  if (wave.phase === "spawning" && wave.spawnCursor >= wave.spawnSchedule.length) {
+    wave = reviseWave(wave, { phase: "combat" });
+  }
+
+  let steppedSurvivors: Readonly<Record<string, CombatSurvivorState>> = survivors;
+  const steppedEnemies: Record<string, ThrallState> = {};
+  let enemyStateChanged = enemies !== state.enemies;
+  for (const entityId of Object.keys(enemies).sort()) {
+    const enemy = enemies[entityId];
+    if (enemy === undefined) continue;
+    if (!enemy.alive && enemy.despawnAtTick !== null && tick >= enemy.despawnAtTick) {
+      const despawned = despawnEnemyFromCollection(enemies, tombstones, entityId, tick);
+      tombstones = despawned.tombstones;
+      enemyStateChanged = true;
+      events.push({ type: "combat.enemy_despawned", entityId, tick });
+      continue;
+    }
+    const stepped = stepThrall(
+      { ...state, enemies, rng: nextRng, survivors: steppedSurvivors, tick, timeMs, wave },
+      enemy,
+      steppedSurvivors,
+      tick,
+    );
+    steppedSurvivors = stepped.survivors;
+    nextRng = stepped.rng;
+    steppedEnemies[entityId] = stepped.thrall;
+    if (stepped.thrall !== enemy) enemyStateChanged = true;
+    events.push(...stepped.events);
+  }
+  enemies = steppedEnemies;
+  if (enemyStateChanged) enemyRevision += 1;
+
+  const enemiesRemaining = wave.spawnSchedule.length - wave.spawnCursor + Object.keys(enemies).length;
+  if (enemiesRemaining !== wave.enemiesRemaining) {
+    wave = reviseWave(wave, { enemiesRemaining });
+  }
+  if (wave.phase !== "break" && wave.spawnCursor >= wave.spawnSchedule.length && enemiesRemaining === 0) {
+    const breakEndsAtTick = tick + WAVE_DIRECTOR_RULES.breakTicks;
+    wave = reviseWave(wave, { breakEndsAtTick, phase: "break" });
+    events.push({
+      type: "combat.wave_completed",
+      breakEndsAtTick,
+      tick,
+      waveNumber: wave.waveNumber,
+      waveRevision: wave.revision,
+    });
+  }
+
   const withoutHistory = {
     ...state,
-    rng: thrallStep.rng,
-    survivors: thrallStep.survivors,
-    thrall: thrallStep.thrall,
+    enemies,
+    enemyRevision,
+    enemyTombstones: tombstones,
+    rng: nextRng,
+    survivors: steppedSurvivors,
     tick,
     timeMs,
+    wave,
   };
   const frame = historyFrame(withoutHistory);
   const cutoff = timeMs - COMBAT_REWIND_WINDOW_MS;
   const retained = state.history.filter((candidate) => candidate.timeMs >= cutoff);
 
   return {
-    events: [...respawnEvents, ...thrallStep.events],
+    events,
     state: { ...withoutHistory, history: [...retained, frame] },
   };
 }

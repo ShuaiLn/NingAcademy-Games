@@ -4,7 +4,8 @@ export type ModelAssetKind =
   | "enemy_attachment"
   | "survivor"
   | "vfx"
-  | "weapon_fp";
+  | "weapon_fp"
+  | "weapon_tp";
 
 export type AnimationSemantic =
   | "idle"
@@ -191,6 +192,20 @@ export const ASSAULT_RIFLE_FP = {
   ],
 } as const satisfies ModelAssetDefinition;
 
+export const ASSAULT_RIFLE_TP = {
+  animationMap: {},
+  assetId: "WPN_Rifle_Assault_A_TP_v01",
+  kind: "weapon_tp",
+  lod: { detailDistance: 26, cullDistance: 55 },
+  path: `${MODEL_ROOT}/weapons/starter/assault_rifle/tp/WPN_Rifle_Assault_A_TP_v01.glb`,
+  requiredNodes: [
+    "MESH_Weapon",
+    "SOCKET_Grip_L",
+    "SOCKET_Grip_R",
+    "SOCKET_Muzzle",
+  ],
+} as const satisfies ModelAssetDefinition;
+
 export const HOUSE_SHARD_PACK = {
   animationMap: {},
   assetId: "VFX_CrystalShards_House_v01",
@@ -206,6 +221,7 @@ export const STATIC_MODEL_ASSETS = [
   ...Object.values(SURVIVOR_MODELS),
   ...Object.values(BOSS_MODELS),
   ASSAULT_RIFLE_FP,
+  ASSAULT_RIFLE_TP,
   HOUSE_SHARD_PACK,
 ] as const;
 

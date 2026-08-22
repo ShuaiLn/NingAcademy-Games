@@ -6,6 +6,8 @@ import { P2PApiClient, P2PApiError, type SessionStatus } from "@/p2p/p2p-api-cli
 import { WebRtcStarNetwork, type StarNetworkStatus } from "@/p2p/webrtc-star";
 import type { P2PRoomJoin } from "@/server/p2p-types";
 
+import { MultiplayerGame } from "./multiplayer-game";
+
 type PortalState =
   | { readonly kind: "checking" }
   | { readonly kind: "locked" }
@@ -142,6 +144,20 @@ export function MultiplayerLobby(): React.JSX.Element {
   const me = state.network.members.find((member) => member.memberId === state.join.memberId);
   const connectedMembers = state.network.members.filter((member) => member.connected);
   const allReady = connectedMembers.length >= 2 && connectedMembers.every((member) => member.ready);
+  const activeNetwork = networkRef.current;
+  if (state.network.roomStatus === "running" && activeNetwork !== null) {
+    const currentSession = state.session;
+    return (
+      <MultiplayerGame
+        join={state.join}
+        key={`${state.join.roomId}:${state.network.topologyEpoch}`}
+        network={activeNetwork}
+        networkStatus={state.network}
+        onLeave={() => leaveRoom(currentSession)}
+      />
+    );
+  }
+
   return (
     <section className="multiplayer-panel room-panel" aria-labelledby="room-title">
       <div className="room-heading">

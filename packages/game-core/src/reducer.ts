@@ -3,6 +3,7 @@ import {
   advanceCombatTicks,
   createCombatStartedEvent,
   createCombatState,
+  createWaveStartedEvent,
   reduceCombatCommand,
 } from "./combat.js";
 import type { CombatCommand, CombatEvent } from "./combat-types.js";
@@ -115,6 +116,12 @@ function userPlayerId(actor: GameActor): PlayerId | null {
 
 function activePlayers(state: GameState): readonly PlayerId[] {
   return state.activePlayerIds.filter((playerId) => state.players[playerId]?.status !== "left");
+}
+
+function withoutPlayer<T>(record: Readonly<Record<string, T>>, playerId: PlayerId): Readonly<Record<string, T>> {
+  const result: Record<string, T> = { ...record };
+  delete result[playerId];
+  return result;
 }
 
 function reduceJoin(state: GameState, input: GameCommandInput): ReductionResult {
@@ -239,6 +246,7 @@ function reduceStart(state: GameState, input: GameCommandInput): ReductionResult
     [
       { type: "room.started", turnOrder: orderDraw.value },
       createCombatStartedEvent(combat),
+      createWaveStartedEvent(combat),
     ],
   );
 }
@@ -294,6 +302,16 @@ function reduceLeave(state: GameState, input: GameCommandInput): ReductionResult
   }
 
   const roomBecameEmpty = state.status === "running" && remainingPlayerIds.length === 0;
+  const combat = state.combat === null
+    ? null
+    : {
+        ...state.combat,
+        history: state.combat.history.map((frame) => ({
+          ...frame,
+          survivors: withoutPlayer(frame.survivors, playerId),
+        })),
+        survivors: withoutPlayer(state.combat.survivors, playerId),
+      };
   if (roomBecameEmpty) {
     events.push({ type: "room.ended", reason: "empty" });
   }
@@ -309,6 +327,7 @@ function reduceLeave(state: GameState, input: GameCommandInput): ReductionResult
       players,
       activePlayerIds: remainingPlayerIds,
       turnOrder: state.turnOrder.filter((id) => id !== playerId),
+      combat,
     },
     events,
   );

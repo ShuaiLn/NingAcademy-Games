@@ -22,8 +22,9 @@ describe("testkit fixtures", () => {
 
     expect(fixture.state.status).toBe("running");
     expect(fixture.state.combat?.survivors[fixture.playerId]).toBeDefined();
-    expect(fixture.state.combat?.thrall.id).toBe("thrall-0");
-    expect(fixture.state.combat?.history).toHaveLength(1);
+    expect(Object.values(fixture.state.combat?.enemies ?? {})).toHaveLength(1);
+    expect(Object.values(fixture.state.combat?.enemies ?? {})[0]?.entityId).toMatch(/^thrall:w1:e0:/u);
+    expect(fixture.state.combat?.history).toHaveLength(2);
   });
 
   it("creates a deterministic started room", () => {

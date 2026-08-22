@@ -6,7 +6,7 @@ import type {
   CombatState,
 } from "./combat-types.js";
 
-export const GAME_STATE_SCHEMA_VERSION = 1 as const;
+export const GAME_STATE_SCHEMA_VERSION = 2 as const;
 export const MAX_RECENT_COMMAND_IDS = 128;
 
 export type RoomId = string;

@@ -1,4 +1,9 @@
-import { HostP2PAuthorityRuntime } from "@ningacademy/authority";
+import {
+  HostP2PAuthorityRuntime,
+  HostP2PAuthorityTransport,
+  RemoteAuthority,
+  type Authority,
+} from "@ningacademy/authority";
 import { COMBAT_TICK_RATE, type GameState } from "@ningacademy/game-core";
 import {
   P2P_CONTROL_CHANNEL,
@@ -14,6 +19,7 @@ import {
 
 import type { P2PMember, P2PRoomJoin, P2PRoomSnapshot, P2PSignal } from "@/server/p2p-types";
 import type { P2PApiClient } from "./p2p-api-client";
+import { WebRtcRemoteAuthorityTransport } from "./webrtc-remote-authority";
 
 export type PeerConnectionState = "connecting" | "connected" | "disconnected" | "failed";
 
@@ -38,6 +44,7 @@ interface PeerLink {
 type ControlListener = (message: P2PControlMessage) => void;
 type RealtimeListener = (message: P2PRealtimeMessage) => void;
 type SnapshotListener = (state: P2PRoomSnapshot) => void;
+type GameStateListener = (state: Readonly<GameState>) => void;
 
 const POLL_INTERVAL_MS = 750;
 const CHECKPOINT_INTERVAL_MS = 5_000;
@@ -50,6 +57,7 @@ function channelOpen(channel: RTCDataChannel | null): channel is RTCDataChannel 
 export class WebRtcStarNetwork {
   readonly #api: P2PApiClient;
   readonly #controlListeners = new Set<ControlListener>();
+  readonly #gameStateListeners = new Set<GameStateListener>();
   readonly #iceServers: readonly RTCIceServer[];
   readonly #links = new Map<string, PeerLink>();
   readonly #realtimeListeners = new Set<RealtimeListener>();
@@ -61,6 +69,7 @@ export class WebRtcStarNetwork {
   #closed = false;
   #hostMemberId: string | null;
   #lastSignalId = 0;
+  #latestGameState: Readonly<GameState> | null = null;
   #members: readonly P2PMember[] = [];
   #latestCheckpointState: Readonly<GameState> | null = null;
   #lastSnapshotBroadcastMs = 0;
@@ -88,6 +97,22 @@ export class WebRtcStarNetwork {
   get isHost(): boolean { return this.#hostMemberId === this.memberId; }
   get hostAuthority(): HostP2PAuthorityRuntime | null { return this.#authority; }
 
+  getLatestGameState(): Readonly<GameState> | null {
+    return this.isHost && this.#authority !== null
+      ? this.#authority.getSnapshot()
+      : this.#latestGameState;
+  }
+
+  createAuthority(): Authority {
+    const transport = this.isHost
+      ? this.#authority === null
+        ? null
+        : new HostP2PAuthorityTransport(this.#authority, this.memberId)
+      : new WebRtcRemoteAuthorityTransport(this);
+    if (transport === null) throw new Error("host authority is not ready");
+    return new RemoteAuthority({ roomId: this.roomId, transport });
+  }
+
   async start(): Promise<void> {
     if (this.#closed) throw new Error("network is closed");
     await this.#poll();
@@ -114,6 +139,13 @@ export class WebRtcStarNetwork {
     return () => this.#realtimeListeners.delete(listener);
   }
 
+  subscribeGameState(listener: GameStateListener): () => void {
+    this.#gameStateListeners.add(listener);
+    const state = this.getLatestGameState();
+    if (state !== null) listener(state);
+    return () => this.#gameStateListeners.delete(listener);
+  }
+
   sendControlToHost(message: P2PControlMessage): void {
     if (this.isHost) throw new Error("the local member is the host");
     const link = this.#hostMemberId ? this.#links.get(this.#hostMemberId) : undefined;
@@ -122,7 +154,10 @@ export class WebRtcStarNetwork {
   }
 
   sendRealtimeInput(payload: Readonly<Record<string, number | boolean>>, inputSequence: number): void {
-    if (this.isHost) return;
+    if (this.isHost) {
+      this.#processRealtimeInput(this.memberId, payload, inputSequence);
+      return;
+    }
     const link = this.#hostMemberId ? this.#links.get(this.#hostMemberId) : undefined;
     if (!link || !channelOpen(link.realtime)) return;
     link.realtime.send(encodeP2PPacket({
@@ -171,13 +206,14 @@ export class WebRtcStarNetwork {
       this.#topologyEpoch = snapshot.topologyEpoch;
       this.#hostMemberId = snapshot.hostMemberId;
       this.#authority = null;
+      this.#latestGameState = null;
       this.#stopSimulationLoop();
       this.#lastSignalId = 0;
     }
 
     if (this.isHost) {
       this.#ensureHostAuthority(snapshot);
-      this.#syncHostLobby(snapshot);
+      this.#syncHostMembership(snapshot);
       for (const member of snapshot.members) {
         if (member.memberId !== this.memberId && member.connected && !this.#links.has(member.memberId)) {
           await this.#createHostLink(member.memberId);
@@ -218,6 +254,7 @@ export class WebRtcStarNetwork {
       this.#broadcastControl({ event, messageType: "game.event", protocolVersion: PROTOCOL_VERSION });
     });
     this.#authority.subscribeSnapshots((state) => {
+      this.#emitGameState(state);
       this.#scheduleCheckpoint(state);
       const now = performance.now();
       if (now - this.#lastSnapshotBroadcastMs < SNAPSHOT_INTERVAL_MS) return;
@@ -228,25 +265,32 @@ export class WebRtcStarNetwork {
         revision: state.revision,
         roomId: state.roomId,
         state,
+        topologyEpoch: this.#topologyEpoch,
       };
       this.#broadcastRealtime(message);
     });
   }
 
-  #syncHostLobby(snapshot: P2PRoomSnapshot): void {
+  #syncHostMembership(snapshot: P2PRoomSnapshot): void {
     const authority = this.#authority;
-    if (!authority || authority.getSnapshot().status !== "lobby") return;
-    for (const member of snapshot.members) {
-      authority.attachMember({ displayName: member.displayName, memberId: member.memberId });
-      const player = authority.getSnapshot().players[member.memberId];
-      if (player && player.ready !== member.ready) {
-        authority.processCommand(member.memberId, createCommandEnvelope({
-          commandId: `${snapshot.roomId}:ready-sync:${member.memberId}:${snapshot.topologyEpoch}:${Number(member.ready)}`,
-          payload: { ready: member.ready, type: "player.ready" },
-          roomId: snapshot.roomId,
-          sentAtMs: Date.now(),
-        }));
+    if (!authority) return;
+    const membershipIds = new Set(snapshot.members.map((member) => member.memberId));
+    if (authority.getSnapshot().status === "lobby") {
+      for (const member of snapshot.members) {
+        authority.attachMember({ displayName: member.displayName, memberId: member.memberId });
+        const player = authority.getSnapshot().players[member.memberId];
+        if (player && player.ready !== member.ready) {
+          authority.processCommand(member.memberId, createCommandEnvelope({
+            commandId: `${snapshot.roomId}:ready-sync:${member.memberId}:${snapshot.topologyEpoch}:${Number(member.ready)}`,
+            payload: { ready: member.ready, type: "player.ready" },
+            roomId: snapshot.roomId,
+            sentAtMs: Date.now(),
+          }));
+        }
       }
+    }
+    for (const playerId of authority.getSnapshot().activePlayerIds) {
+      if (!membershipIds.has(playerId)) authority.detachMember(playerId);
     }
     if (snapshot.status === "running" && authority.getSnapshot().status === "lobby") {
       authority.processCommand(this.memberId, createCommandEnvelope({
@@ -323,6 +367,7 @@ export class WebRtcStarNetwork {
           revision: state.revision,
           roomId: state.roomId,
           state,
+          topologyEpoch: this.#topologyEpoch,
         }));
       }
       this.#emitStatus(null);
@@ -353,30 +398,51 @@ export class WebRtcStarNetwork {
     if (!message) return;
     if (this.isHost) {
       if (message.messageType !== "player.input" || !this.#authority) return;
-      const { aimPitch, aimYaw, clientTimeMs, moveForward, moveRight } = message.payload;
-      if (typeof aimPitch !== "number" || typeof aimYaw !== "number"
-          || typeof clientTimeMs !== "number" || typeof moveForward !== "number"
-          || typeof moveRight !== "number") return;
-      try {
-        this.#authority.processCommand(peerId, createCommandEnvelope({
-          commandId: `${this.roomId}:input:${peerId}:${message.inputSequence}`,
-          payload: {
-            aimPitch,
-            aimYaw,
-            clientTimeMs,
-            moveForward,
-            moveRight,
-            sequence: message.inputSequence,
-            type: "combat.input",
-          },
-          roomId: this.roomId,
-          sentAtMs: Date.now(),
-        }));
-      } catch { /* invalid, replayed, or unbound peer input is rejected */ }
+      this.#processRealtimeInput(peerId, message.payload, message.inputSequence);
       return;
     }
-    if (peerId !== this.#hostMemberId || message.messageType !== "game.snapshot") return;
+    if (
+      peerId !== this.#hostMemberId
+      || message.messageType !== "game.snapshot"
+      || message.topologyEpoch !== this.#topologyEpoch
+    ) return;
+    this.#emitGameState(message.state);
     for (const listener of this.#realtimeListeners) listener(message);
+  }
+
+  #processRealtimeInput(
+    memberId: string,
+    payload: Readonly<Record<string, number | boolean>>,
+    inputSequence: number,
+  ): void {
+    if (!this.#authority) return;
+    const { aimPitch, aimYaw, clientTimeMs, moveForward, moveRight } = payload;
+    if (typeof aimPitch !== "number" || typeof aimYaw !== "number"
+        || typeof clientTimeMs !== "number" || typeof moveForward !== "number"
+        || typeof moveRight !== "number") return;
+    try {
+      this.#authority.processCommand(memberId, createCommandEnvelope({
+        commandId: `${this.roomId}:input:${memberId}:${inputSequence}`,
+        payload: {
+          aimPitch,
+          aimYaw,
+          clientTimeMs,
+          moveForward,
+          moveRight,
+          sequence: inputSequence,
+          type: "combat.input",
+        },
+        roomId: this.roomId,
+        sentAtMs: Date.now(),
+      }));
+    } catch { /* invalid, replayed, or unbound peer input is rejected */ }
+  }
+
+  #emitGameState(state: Readonly<GameState>): void {
+    if (state.roomId !== this.roomId) return;
+    if (this.#latestGameState !== null && state.revision <= this.#latestGameState.revision) return;
+    this.#latestGameState = state;
+    for (const listener of this.#gameStateListeners) listener(state);
   }
 
   async #handleSignal(signal: P2PSignal): Promise<void> {

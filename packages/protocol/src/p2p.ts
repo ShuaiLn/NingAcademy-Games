@@ -1,4 +1,9 @@
-import type { GameState } from "@ningacademy/game-core";
+import {
+  GAME_STATE_SCHEMA_VERSION,
+  isCompatibleCombatMapLayout,
+  type CombatMapLayout,
+  type GameState,
+} from "@ningacademy/game-core";
 
 import {
   PROTOCOL_VERSION,
@@ -49,6 +54,7 @@ export type P2PRealtimeMessage =
       readonly roomId: string;
       readonly revision: number;
       readonly state: GameState;
+      readonly topologyEpoch: number;
     }
   | {
       readonly protocolVersion: typeof PROTOCOL_VERSION;
@@ -74,12 +80,54 @@ function isRevision(value: unknown): value is number {
   return Number.isSafeInteger(value) && Number(value) >= 0;
 }
 
-function isGameState(value: unknown): value is GameState {
+function isFinitePosition(value: unknown): boolean {
   return isRecord(value)
-    && value.schemaVersion === 1
-    && isIdentifier(value.roomId)
-    && isRevision(value.revision)
-    && isRecord(value.players);
+    && typeof value.x === "number" && Number.isFinite(value.x)
+    && typeof value.z === "number" && Number.isFinite(value.z);
+}
+
+function isCombatCollectionState(value: Record<string, unknown>): boolean {
+  if (
+    !isRevision(value.enemyRevision)
+    || !isRecord(value.enemies)
+    || !isRecord(value.enemyTombstones)
+    || !isRecord(value.wave)
+    || !isRevision(value.wave.revision)
+    || !isRevision(value.wave.enemiesRemaining)
+    || !Number.isSafeInteger(value.wave.waveNumber)
+    || Number(value.wave.waveNumber) < 1
+    || !Array.isArray(value.wave.spawnSchedule)
+  ) return false;
+  for (const [entityId, enemy] of Object.entries(value.enemies)) {
+    if (
+      !isIdentifier(entityId)
+      || !isRecord(enemy)
+      || enemy.entityId !== entityId
+      || typeof enemy.alive !== "boolean"
+      || typeof enemy.hp !== "number" || !Number.isFinite(enemy.hp) || enemy.hp < 0
+      || !isFinitePosition(enemy.position)
+    ) return false;
+  }
+  return Object.entries(value.enemyTombstones).every(([entityId, tick]) => (
+    isIdentifier(entityId) && isRevision(tick)
+  ));
+}
+
+function isGameState(value: unknown): value is GameState {
+  if (
+    !isRecord(value)
+    || value.schemaVersion !== GAME_STATE_SCHEMA_VERSION
+    || !isIdentifier(value.roomId)
+    || !isRevision(value.revision)
+    || !isRecord(value.players)
+  ) {
+    return false;
+  }
+  if (value.combat === null) return true;
+  return isRecord(value.combat)
+    && isRecord(value.combat.map)
+    && isCompatibleCombatMapLayout(value.combat.map as unknown as CombatMapLayout)
+    && isCombatCollectionState(value.combat);
 }
 
 function utf8ByteLength(value: string): number {
@@ -143,8 +191,9 @@ export function decodeP2PRealtimePacket(raw: unknown): P2PRealtimeMessage | null
   if (!isRecord(value) || value.protocolVersion !== PROTOCOL_VERSION || typeof value.messageType !== "string") return null;
 
   if (value.messageType === "game.snapshot") {
-    return exactKeys(value, ["protocolVersion", "messageType", "roomId", "revision", "state"])
+    return exactKeys(value, ["protocolVersion", "messageType", "roomId", "revision", "state", "topologyEpoch"])
       && isIdentifier(value.roomId) && isRevision(value.revision) && isGameState(value.state)
+      && Number.isSafeInteger(value.topologyEpoch) && Number(value.topologyEpoch) > 0
       && value.state.roomId === value.roomId && value.state.revision === value.revision
       ? value as unknown as P2PRealtimeMessage
       : null;

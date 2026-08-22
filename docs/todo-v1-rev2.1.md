@@ -1,8 +1,40 @@
 # NingAcademy Game V1 完整待办清单（rev2.1 执行版）
 
-> 生成时间：2026-08-16。基于 `NingAcademy-3DFPS-V1-实施计划-rev2.1-BossIndependent.md`（下称"计划书"）逐条拆解，并对照 `NingAcademy-Games` 仓库当前代码、`docs/project-status-rev2.1.md`、`docs/locked-product-rules.md`、`docs/main-site-integration.md` 与主站 `NingAcademy` 仓库的 `docs/p1/`、`supabase/migrations/`、`AGENTS.md` 核对了实际完成度。
+> 生成时间：2026-08-16；最后一次实际代码核对与实施：2026-08-21（工作树基于 commit `c834808`，本轮改动尚未提交）。基于 `NingAcademy-3DFPS-V1-实施计划-rev2.1-BossIndependent.md`（下称"计划书"）逐条拆解，并对照 `NingAcademy-Games` 仓库当前代码、`docs/project-status-rev2.1.md`、`docs/locked-product-rules.md`、`docs/main-site-integration.md` 与主站 `NingAcademy` 仓库的 `docs/p1/`、`supabase/migrations/`、`AGENTS.md` 核对了实际完成度。
 >
 > **这不是一份新计划，是把计划书 §2–§6 转成可以逐条打勾执行的任务清单。** 规则本身以计划书为准；本文档若与计划书冲突，以计划书为准并回来改本文档。
+>
+> ## 2026-08-21 修改前基线复核记录
+>
+> 重新读取两个仓库全部代码 + 直接跑 `mcp__supabase__list_migrations`/`get_advisors` 对照本文档逐条核实后的变化：
+>
+> 1. **migration 审批链路已全部走完**：上一版记录为"待批准"的 `rls_auto_enable()` EXECUTE 收权 migration（原 1a）已于 2026-08-17 现场确认应用到 Production；2026-08-17 新发现并起草的 P2P 建房 503 故障修复 migration（Git 第 30 条，`20260818021000_fix_p2p_room_code_random_source.sql`，本文档记为 1b）**本次核实也已应用到 Production**——`list_migrations` 实测 Production 30/30，与 Git 30 个文件逐条（版本号+文件名）精确匹配。§2.2.0 需要用户操作的事项从 4 项收窄为 3 项（DB LOGIN / Vercel 项目 / DNS）。
+> 2. `mcp__supabase__get_advisors`（security）复核：83 条告警全部是这个项目一贯的 SECURITY DEFINER 约定告警或 `game`/`game_private`/`private` 未暴露 schema 上的 `rls_enabled_no_policy`（INFO 级、按设计如此），**没有发现与近期 migration 相关的新告警**，`rls_auto_enable()` 的 PUBLIC EXECUTE 告警已不再出现。
+> 3. **P2 的 Babylon 场景比原记录更靠前**：本轮修改前，`apps/web/src/components/practice-arena.tsx` 已经用真实 Babylon `Engine`/`Scene` 加载注册模型并跑渲染循环，但只接在单人 `LocalPracticeAuthority` 路径上；多人房间场景/预测/reconciliation/插值当时仍是零起点。当前状态见紧随其后的 gameplay 实施追加和 §4.2。
+> 4. **P1 对抗性规则逐条复核**：瞬移拒绝、伪造击杀防御、权威状态覆盖拒绝均已实现且（除伪造击杀外）已有测试；超射速开火与无弹药开火的**校验代码本身已存在**，只缺对应单元测试。同时发现文档自相矛盾——`COMBAT_REWIND_WINDOW_MS` 代码实测是 **250ms**，不是文档一直沿用的 200ms，已统一订正。
+> 5. **P11 Games 仓库"游戏中心"页面比原记录更靠前**：不是纯占位，已有真实的 WebRTC 建房/加房大厅（`multiplayer-lobby.tsx`），仍缺房间列表/进度展示/仪表盘。
+> 6. §2.3 里两条原本标"需要核对是否已写"的主站测试（`academic_terms` 排他约束、`game_assignment_versions` 触发器保护）本次确认**均未写**，不再是"待核对"而是明确的待办。
+> 7. P3/P4/P5/P6/P7/P8/P9/P10/P12/§16.1/P13 的其余条目逐一比对代码后确认与上一版记录一致，无新增内容——`NingAcademy-Games` 仓库自 2026-08-17 之后没有新提交（`git log` 确认），这些阶段的工程状态本来就不会变。
+> 8. **无法从仓库内验证的三项**（DB LOGIN 创建、Vercel Production 项目创建、DNS 配置）本次一律按"未完成"处理——如果你已经在 Supabase/Vercel/DNS 控制台外操作过，请告知以更新本文档。
+>
+> ## 2026-08-21 gameplay 实施追加（未执行任何 Production 写入）
+>
+> 1. P1 对抗性 Gate 已补齐：新增伪造击杀、超射速与空弹开火回归测试；三者均断言 Host 拒绝且不改变权威伤害/弹药/世界状态。P1 的确定性 Host-vs-LocalAuthority、精确 rewind 边界和 soak 仍是独立待办，不能因此把整个 P1 测试阶段写成 100%。
+> 2. 多人房间 `running` 状态已从纯大厅切换为真实 Babylon gameplay：本机第一人称步枪、远端第三人称幸存者与步枪、Thrall、WASD/鼠标/射击/换弹、Host 权威 HP/弹药/命中/死亡/重生、成员永久离开后的 despawn 均已接线。这里仍是“一枪一怪平面场”的 P1 内容，不代表完整 FPS 内容完成。
+> 3. 新增 `MultiplayerPresentationTimeline`：本地只预测移动，收到新 Host snapshot 后丢弃已确认输入并重放剩余输入；远端幸存者与 Thrall 以 100ms 展示延迟插值；旧 revision/错房间快照被丢弃。伤害、HP、弹药、命中与重生从未下放给 peer。
+> 4. Host 玩家也通过与 peer 相同的 `combat.input` 权威处理路径驱动自身；输入 yaw 与斜向移动先归一化到 game-core 的合法范围。`player.leave` 现在同步移除 `combat.survivors` 与 history 中的对应实体，而暂时断线、仍在 180 秒重连窗口内的成员不会被误删。
+> 5. 本轮验证：`check:boundaries`、typecheck、lint、23 个 Vitest 文件共 106 项测试、Next 16.3 production build、模型检查和 8-context P2P Playwright 均已通过；本地浏览器 smoke 已确认主页/单人 Babylon 场景无框架错误覆盖层。真实 Production 多人房间没有在本轮创建，仍需受限 DB LOGIN/Vercel/DNS 后做认证 E2E。
+> 6. 按完整可玩 FPS V1 的功能权重估算，当前整体完成度约 **27%**；这是对代码与测试覆盖面的工程估算，不是阶段勾选数的平均值。
+>
+> ## 2026-08-21 P6 greybox / Enemy Collection / Wave 实施追加（未执行任何 Production 写入）
+>
+> 1. 已在既有 Host-authoritative 架构内加入确定性 5×5 greybox：共享 seed、版本化 canonical/collision/asset id、FNV-1a `layoutHash`、紧凑 module placements、8 个 player spawn、4 个 enemy spawn zone、navigation bounds/graph、碰撞体，以及 Supply/Boss 预留区。WebRTC 只传元数据/世界状态，不传 mesh。
+> 2. Host 模拟与 peer 本地预测共用同一地图边界/碰撞函数；snapshot/checkpoint 携带地图契约，hash/版本不匹配直接拒绝。该项是 P6 的确定性 gameplay 基础，不代表四生态正式模块资产、预烘焙 navmesh 或资源预算管线已经完成。
+> 3. 单 Thrall 状态已升级为 stable `entityId` 敌人集合；生成、AI/target、移动、攻击、HP、死亡、墓碑 despawn 全部只由 Host 决定，peer 只按快照插值并播放 spawn/move/attack/hit/death。旧/迟到快照不能复活墓碑实体。
+> 4. 新增最小 Wave Director：权威 wave number/kind/phase/revision、remaining、确定性 spawn seed/schedule/zone selection、wave start/complete 与 break timer；Wave 1 为 3 只，后续数量与 HP 递增。它为未来 Day/Supply/Boss 扩展留接口，但没有假装实现完整 Day 状态机。
+> 5. snapshot 保留 room/revision/topology epoch 校验并新增 enemy/wave revision；checkpoint round-trip 已覆盖地图、敌人集合与 Wave 重建兼容性。真实 authenticated late join、reconnect、Host migration gameplay E2E 仍未完成。
+> 6. 新增并通过多敌人稳定 ID、重复/墓碑生成拒绝、despawn 一致性、伪造击杀拒绝、Wave 开始/阻塞完成/下一 Wave、late snapshot 防复活、stale wave revision、Host+多 Peer 同视图等测试。最终验证为 typecheck、lint、25 个 Vitest 文件/122 项测试、Next 16.3 production build、boundary、70/65 模型检查、Host+7 Peers Playwright 与 Babylon 9.21/WebGL2 浏览器 smoke 全通过。
+> 7. 按完整可玩 FPS V1 的功能权重重新估算，当前整体完成度约 **31%**；本轮未修改 NingAcademy 主站，也未执行 Production DDL/DML/migration/data write/deploy。
 >
 > ## 状态图例
 >
@@ -16,7 +48,7 @@
 >
 > ## 如何使用本文档
 >
-> 1. 按 §0 总览表确认当前所处阶段（当前重心：**P0 生产部署收尾 + P1 收尾验证 + P4/P5/P6/P7 引擎开发**）。
+> 1. 按 §0 总览表确认当前所处阶段（当前重心：**P1 剩余确定性验证 + P2 移动端/网络压力验证 + P4/P5/P6/P7 实际玩法引擎**；P0 生产收尾等待 3 项用户操作，但不阻塞本地玩法开发）。
 > 2. 每个阶段内部条目**大致**按依赖顺序排列，但同一层级标"可并行"的条目之间没有先后要求。
 > 3. 阶段之间的强依赖见每节开头的"前置依赖"。**不要**在前置未完成时开始下一阶段的引擎开发（计划书 §2 明确写死 P-1 未过禁止设计任何游戏表；rev2 同理要求 P4 卡牌先于 P5 引擎接线，P6 地图 hash 先于 P9 联机验证）。
 > 4. 每次完成一批任务后，回来把对应 `- [ ]` 改成 `- [x]`，并更新 §0 总览表与 `docs/project-status-rev2.1.md`。
@@ -29,16 +61,16 @@
 | 阶段 | 内容 | 状态 | 主要缺口 |
 |---|---|---|---|
 | P-1 | 数据库审计（主站仓库） | ✅ 完成 | 未来任何新 Production 发布前需要**重新**跑只读 preflight（不是一次性的） |
-| P0 | 独立仓库、身份链、P2P 信令基础设施 | 🔄 数据库层 9/10 migration 已部署，其余卡在 4 项 🚫 用户操作 | **需要你本人操作的 4 件事**（见 §2.2.0）：①批准 `rls_auto_enable()` 收权 migration 上线（已起草+CI 通过，只差批准）②创建受限数据库 LOGIN ③创建 Games Vercel Production 项目 ④配置 DNS。这 4 项就位后，§2.2.1–2.2.5（配置/部署/验证/parity audit）全部由 AI 接续，不需要你再手动操作 |
-| P1 | 单人垂直切片（一图一枪一怪） | 🔄 基本完成，缺对抗性测试 | 缺显式的"拒绝伪造权威状态"测试用例 |
-| P2 | Babylon 场景/预测/可访问性/R2 资产管线 | 🔄 可访问性工具链完成，资产管线未接入 | R2 四 bucket、`assets.ningacademy.org`、client 预测/reconciliation 未确认 |
+| P0 | 独立仓库、身份链、P2P 信令基础设施 | 🔄 数据库层 30/30 migration 已部署（含 2026-08-17 新发现并修复的 P2P 建房故障），剩 3 项 🚫 用户操作 | **需要你本人操作的 3 件事**（见 §2.2.0）：①创建受限数据库 LOGIN ②创建 Games Vercel Production 项目 ③配置 DNS。migration 审批链路已全部走完（2026-08-21 用 `list_migrations` 确认 Production 30/30 与 Git 逐条匹配）。这 3 项就位后，§2.2.1–2.2.5（配置/部署/验证/parity audit）全部由 AI 接续，不需要你再手动操作 |
+| P1 | 单人垂直切片（一图一枪一怪） | 🔄 对抗性 Gate 已通过，余下确定性/rewind 边界/soak | 瞬移、伪造击杀、权威状态覆盖、超射速和无弹药射击均有自动化拒绝测试；Host-vs-LocalAuthority 逐 tick、250ms rewind 精确边界和长时运行仍未补 |
+| P2 | Babylon 场景/预测/可访问性/R2 资产管线 | 🔄 桌面多人 greybox 场景与预测链已接入，移动端/音频/R2 未做 | Babylon 多人 greybox、多敌人呈现、移动预测、Host reconciliation、远端插值已完成；手机触控、learning/world 音频总线、裂纹 shader、R2 四 bucket、`assets.ningacademy.org` 仍未做 |
 | P3 | 题目系统与听力防泄漏 | 🔄 协议层完成，判题/音频管线未做 | 听力 HMAC key 轮换、Cloudflare Worker、答题保护、听力静音总线均未实现 |
 | P4 | 卡牌 DSL 与内容 | 🔄 DSL + 260/262 张卡数据完成，运行时引擎未接线 | S161/S162 缺失；机制槽/堆叠/proc 预算完全未进入 game-core |
-| P5 | Day/Boss/难度曲线 | 🔄 Boss 美术资产 4 个独立包完成，玩法引擎未开始 | Day 状态机、Boss Controller、词缀、精英变体、watchdog 均未实现 |
-| P6 | 地图模块 | ⬜ **完全未开始** | 零地图资产、零 `layout_hash` 机制、零预烘焙碰撞/导航管线 |
+| P5 | Day/Boss/难度曲线 | 🔄 最小 Wave Director + 4 个独立 Boss 美术包完成 | Wave 已能确定性生成/清空/休整/递增，但完整 Day、Supply、Boss Controller、词缀、精英变体、watchdog 均未实现 |
+| P6 | 地图模块 | 🔄 确定性 multiplayer greybox 基础完成 | canonical layout/hash、spawn/navigation/collision/预留区已接线；四生态正式模块资产、预烘焙 navmesh 管线和资源预算验证未做 |
 | P7 | 武器族与命中验证 | 🔄 5 把起始武器美术完成，命中验证引擎仅有基础步枪 | 狙击/冲锋/长矛/剑的专属校验与延迟策略均未实现 |
 | P8 | 职业 | 🔄 5 幸存者美术 + 解锁题规则数据完成，技能引擎未做 | 10 个技能、僵尸玩家 4 职业挂件、通用资产（倒地态/复活态/决策态）未做 |
-| P9 | 2–8 人合作 | 🔄 信令基础设施完成，玩法层未做 | 救援、5 小时强制休息、暂停配额、真正的 8 人联机压测未做 |
+| P9 | 2–8 人合作 | 🔄 信令、基础多人战斗、敌人集合与 Wave 同步已接线 | 2–8 人基础移动/射击/HP、多敌人/Wave 同步已有；完整 late join/reconnect/Host migration、救援、共享 Day、强制休息、暂停配额与真实 gameplay 网络压测未做 |
 | P10 | 非对称对抗 | ⬜ 未开始 | 僵尸玩家身体/生命数/重生延迟/感染点/Boss 空间预算/令牌全部未实现 |
 | P11 | 教学后台集成 | 🔄 主站教师配置 UI 已上线，报告/申诉 UI 未接线 | 教师游戏报告、accommodation UI、班级内非对称配对入口未做 |
 | P12 | 治理与结算 | ⬜ 基本未开始（撤销触发器已在主站落地） | 段位计算、日志脱敏白名单、撤销 SLO 实测、申诉/导出/匿名化未做 |
@@ -46,9 +78,11 @@
 
 **关键判断（写清楚是为了不要重复踩坑）：**
 
-- 这个项目目前是"内容/资产 领先于 引擎"的状态：卡牌 DSL 数据、4 个 Boss 完整美术包、5 名幸存者模型、起始武器模型都已经做了很多，但 `packages/game-core` 里真正跑起来的规则引擎还停留在 P1 水平（房间大厅 + 单一 Thrall + 单一步枪）。**下一步工程重心应该是把已有内容"接线"进引擎，而不是继续堆更多内容或美术**，除非某个引擎系统明确依赖某项缺失的内容（例如 P6 地图模块）。
-- P6（地图模块）是全项目唯一一个"零资产、零代码"的阶段，同时计划书自己说它是"工作量最大的一块"。建议尽早排期，否则会成为 P9/P10 联机测试的硬阻塞（Host 与 peer 都需要地图才能测试真实对局）。
-- P0 生产部署链路里真正需要用户本人操作的只有 4 件事（批准 migration、创建并授权 DB LOGIN、创建 Vercel 项目、配置 DNS）。其余全部——环境变量配置、实际部署、冒烟测试、DB parity audit、问题修复——都是 AI 可以直接执行的任务，完整流程见 §2.2。这 4 项授权到位后，后续阶段的"发布"环节复用同一套基础设施，不需要重复搭建。
+- 这个项目目前仍是"内容/资产 领先于 引擎"的状态：卡牌 DSL 数据、4 个 Boss 完整美术包、5 名幸存者模型、起始武器模型都已经做了很多；运行时现在到达“确定性 greybox + 多敌人 + 最小 Wave + 单一步枪”，仍远未覆盖完整 Day/Boss/卡牌/库存。**下一步工程重心应该继续把已有内容接进引擎，而不是继续堆更多内容或美术。**
+- P6 已不再是零代码：确定性 canonical greybox、layout hash、碰撞/导航/出生契约已经解除基础联机世界一致性的阻塞；但正式四生态模块资产与构建验证仍是计划书所说的“大块工作”，不能把本轮 greybox 误记为整个 P6 完成。
+- P0 生产部署链路里真正需要用户本人操作的现在只剩 3 件事（创建并授权 DB LOGIN、创建 Vercel 项目、配置 DNS）——migration 审批已经全部走完：截至 2026-08-21，Production 30/30 migration 与 Git 逐条匹配，含 2026-08-17 新发现并修复的 P2P 建房故障（详见 §2.2.0）。其余全部——环境变量配置、实际部署、冒烟测试、DB parity audit、问题修复——都是 AI 可以直接执行的任务，完整流程见 §2.2。这 3 项授权到位后，后续阶段的"发布"环节复用同一套基础设施，不需要重复搭建。
+- 2026-08-21 gameplay 实施后，P2 的桌面多人基础链路已从零推进到可运行：`multiplayer-arena.tsx` 消费 Host snapshot，`MultiplayerPresentationTimeline` 承担本地移动预测/确认输入重放/远端插值，房间 `running` 状态会进入 Babylon 场景。手机触控、真实延迟/丢包收敛 E2E、音频总线与 R2 仍未完成，详见 §4.2/§4.5。
+- 2026-08-21 P6/Wave 实施后，最值得紧接着做的是**完整 late join/reconnect/Host migration gameplay restoration + 延迟/丢包/旧快照网络 E2E**：地图、enemy tombstones 和 wave revisions 已经进入快照/checkpoint，正是把重建闭环做实的合适时点；完成后再接 Loot/Inventory/Card runtime，能避免新系统继续扩大恢复缺口。
 
 ---
 
@@ -97,30 +131,37 @@
 
 ### 2.2 生产部署 Rollout：用户 4 项授权 → AI 接续完成
 
-> 整条链路只有 **2.2.0** 里的几件事必须由用户本人操作或明确批准：原始 4 件事中的第 1 件（9 个 migration 的批准）已完成，**剩 4 件（1a/2/3/4）待你操作**，见下表。这些就位后，2.2.1–2.2.5（配置→部署→验证→DB parity audit→问题修复）全部由 AI 通过 Supabase MCP 工具（`apply_migration`/`list_migrations`/`execute_sql`/`get_advisors`）、Vercel CLI/API、Cloudflare CLI/API、脚本与测试工具接续执行，不需要用户逐步手动操作。**不要在已批准的清单之外主动扩大 Production 写入范围。**
+> 整条链路只有 **2.2.0** 里的几件事必须由用户本人操作或明确批准：migration 相关的三项（原始 1、rls_auto_enable 收权的 1a、P2P 建房修复的 1b）截至 2026-08-21 已全部确认应用到 Production，**剩 3 件（2/3/4）待你操作**，见下表。这些就位后，2.2.1–2.2.5（配置→部署→验证→DB parity audit→问题修复）全部由 AI 通过 Supabase MCP 工具（`apply_migration`/`list_migrations`/`execute_sql`/`get_advisors`）、Vercel CLI/API、Cloudflare CLI/API、脚本与测试工具接续执行，不需要用户逐步手动操作。**不要在已批准的清单之外主动扩大 Production 写入范围。**
 
-#### 2.2.0 🚫 用户侧授权（原 4 项中的第 1 项已完成；剩 1a/2/3/4 共 4 项待你操作）
+#### 2.2.0 🚫 用户侧授权（migration 相关的 1/1a/1b 三项已全部完成；剩 2/3/4 共 3 项待你操作）
 
-> **需要你本人操作/批准的还有 4 件事：1a、2、3、4。** 除此之外的一切（migration 执行、验证、Vercel/Cloudflare 配置、部署、冒烟测试、parity audit）都是 AI 可以直接做的，不需要等你逐步操作。
+> **需要你本人操作/批准的还有 3 件事：2、3、4。** 除此之外的一切（migration 执行、验证、Vercel/Cloudflare 配置、部署、冒烟测试、parity audit）都是 AI 可以直接做的，不需要等你逐步操作。
 
 1. [x] 🚫 **批准 Production migration**（已完成，2026-08-16）：`20260815160000` ~ `20260815200000` 这 9 个 migration（含 5 个游戏相关）已按文件名顺序应用到 Production——`mcp__supabase__list_migrations` 实测 Production 共 28 个 migration，与 Git 当前 29 条历史中的**前 28 条**逐条匹配；Git 第 29 条（`20260816150000_restrict_rls_auto_enable_execute.sql`，见 1a）是另一个 pending migration，不在这次核对范围内。**注意**：其中 `20260815180000_game_session_identity_v2.sql`、`20260815200000_game_p2p_signaling.sql` 两个文件在最初编写后又经历过 Postgres 17 临时角色成员关系清理的 bug 修复（commit `86a20a4`/`48471fa`/`a0bf694`），实际执行到 Production 上的是哪个版本尚未做逐字节确认，建议在 §2.2.4 parity audit 里一并核对。
    - 验证项：`docs/p1/MIGRATION_DRIFT_REPORT.md`"2026-08-16 Production deployment confirmed"一节记录了这次 spot-check 的范围与限制；**正式的受保护只读 schema/ACL/FK 全量重导出仍未在部署后重跑过**，不能当作已完成的完整 parity audit
 
-1a. [ ] 🚫 **批准新的 `rls_auto_enable()` EXECUTE 收权 migration** ——**只差你批准，其余都已就绪**：Security Advisor 复查发现 `public.rls_auto_enable()`（Supabase Dashboard 自动创建的 RLS 自动启用 event trigger 函数）仍带 PostgreSQL 默认的 PUBLIC EXECUTE，`anon`/`authenticated`/`service_role`/`game_server`/`games_api` 都能直接调用。
-    - 已起草 `supabase/migrations/20260816150000_restrict_rls_auto_enable_execute.sql`：只 `revoke execute`，不动函数体/owner/`SECURITY DEFINER`/event trigger；且已改为 `pg_catalog.to_regprocedure()` 判空后再 `execute` 的条件 no-op 写法，不存在该函数的环境（clean replay/CI/本地）安全跳过
-    - 2026-08-16 首版曾在 GitHub Actions 上导致 P-1 clean replay 失败（`SQLSTATE 42883 undefined_function`，run #38）；修复后 **run #39（2026-08-17）P-1 replay 已 PASS**
-    - **尚未应用到 Production**，需要同样的只读 preflight + 人工批准流程——建议排在步骤 2（创建 `games_api_login`）之前完成，保持权限链从一开始就是干净的
-2. [ ] 🚫 **创建并授权受限数据库 LOGIN**：在 Supabase 控制台创建一个可登录、无 owner/service-role 权限的 server-only credential，并执行 `GRANT games_api TO <login>`（不得复用任何现有 owner/service_role 凭据；`games_api` role 已存在，但建议等步骤 1a 的 ACL 收紧 migration 落地后再创建，保持权限链干净）
-3. [ ] 🚫 **创建 Games Vercel Production 项目**：创建独立 Vercel Project 并绑定到 `NingAcademy-Games` GitHub 仓库（不可与主站共用同一个 Vercel Project，可以同一个 Vercel Team）——与步骤 1a、2 **无依赖，可并行**
-4. [ ] 🚫 **配置正式域名 DNS**：添加 `game.ningacademy.org`（本节）与 `assets.ningacademy.org`（见 §4.3）两条 DNS 记录——与步骤 1a、2、3 **无依赖，可并行**
+1a. [x] 🚫 **批准 `rls_auto_enable()` EXECUTE 收权 migration**（已完成）：Security Advisor 复查发现 `public.rls_auto_enable()`（Supabase Dashboard 自动创建的 RLS 自动启用 event trigger 函数）仍带 PostgreSQL 默认的 PUBLIC EXECUTE，`anon`/`authenticated`/`service_role`/`game_server`/`games_api` 都能直接调用。
+    - `supabase/migrations/20260816150000_restrict_rls_auto_enable_execute.sql`：只 `revoke execute`，不动函数体/owner/`SECURITY DEFINER`/event trigger；改为 `pg_catalog.to_regprocedure()` 判空后再 `execute` 的条件 no-op 写法，不存在该函数的环境（clean replay/CI/本地）安全跳过
+    - **已应用到 Production**：2026-08-17 现场 spot-check 确认 `public.rls_auto_enable()` 对 `public`/`anon`/`authenticated` 均已无 EXECUTE 授权；2026-08-21 重新跑 `mcp__supabase__get_advisors`（security）复核，未再出现该函数的 PUBLIC EXECUTE 告警
+    - P-1 CI 的批准-drift 过滤器最初漏算了这次收权在 `pg_dump` 里新产生的 `Type: ACL` 块——第一次真正的 protected-audit CI 运行（run `32098254600`，2026-08-17）复现了这个预判中的 gap，随后在 commit `9cbdd13` 补上第二条哈希锁定的过滤条目（`IA-2-ACL`），本地重放确认该 diff 已清零；**这个补丁本身还没有被真正的 CI 重跑验证过**，见 §2.2.4 遗留项
 
-> 步骤 1 已完成。剩余的 1a/2/3/4 之间除"步骤 2 建议排在步骤 1a 之后"外没有硬顺序，能同时找用户一次性批完就一次性批完，不必逐条等待。
+1b. [x] 🚫 **批准修复 P2P 建房故障的 migration 30**（已完成）：2026-08-17 发现学生"创建游戏房间"从 `POST /api/p2p/rooms` 收到 503——根因是 `game_private.new_p2p_room_code()` 在 `set search_path = ''` 下直接调用 `gen_random_bytes(6)`，该函数只存在于 `extensions` schema，而函数 owner `game_api_owner` 对 `extensions` 无 `USAGE`，导致该函数在 Production 从未成功解析过。
+    - `supabase/migrations/20260818021000_fix_p2p_room_code_random_source.sql` 把随机源换成核心 Postgres 的 `pg_catalog.gen_random_uuid()`/`uuid_send()`（同一 `SET ROLE game_api_owner` 自限定授权模式），不改其他任何对象
+    - **已应用到 Production**：2026-08-21 用 `mcp__supabase__list_migrations` 直接核对，Production 已有全部 30 个版本，与 Git 30 个文件逐条（版本号+文件名）精确匹配——**这是本次复核发现的最大变化**：上一版文档记录这一项"尚未应用"，现已确认完成
+    - 遗留清理项（AI 可执行）：`scripts/p1/approved-pending-migrations.mjs` 此前把 migration 30 列为 P-1 CI 唯一可豁免的 pending migration；既然它已经上线，这份清单现在应该改回空，让 Git-vs-Production 历史比对恢复"必须完全一致"的严格模式，见 §2.2.5
+
+2. [ ] 🚫 **创建并授权受限数据库 LOGIN**：在 Supabase 控制台创建一个可登录、无 owner/service-role 权限的 server-only credential，并执行 `GRANT games_api TO <login>`（不得复用任何现有 owner/service_role 凭据；`games_api` role 已存在，migration 链路已全部走完，权限链干净，随时可以创建）——**2026-08-21 复核：仓库内找不到任何已完成的证据，按未完成处理；如果你已经在 Supabase 控制台外操作过，请告知以更新本文档**
+3. [ ] 🚫 **创建 Games Vercel Production 项目**：创建独立 Vercel Project 并绑定到 `NingAcademy-Games` GitHub 仓库（不可与主站共用同一个 Vercel Project，可以同一个 Vercel Team）——与步骤 2、4 **无依赖，可并行**；2026-08-21 复核：仓库内无 `.vercel`/`vercel.json` 等已创建证据，按未完成处理
+4. [ ] 🚫 **配置正式域名 DNS**：添加 `game.ningacademy.org`（本节）与 `assets.ningacademy.org`（见 §4.3）两条 DNS 记录——与步骤 2、3 **无依赖，可并行**；DNS 状态无法从仓库内验证，按未完成处理
+
+> migration 相关的 1/1a/1b 三项已全部完成。剩余的 2/3/4 之间没有硬顺序，能同时找用户一次性批完就一次性批完，不必逐条等待。
 
 #### 2.2.1 ⬜ AI 自动继续：配置（各条依赖对应的 2.2.0 授权项，授权一到位就能立刻做）
 
-- [x] 用 Supabase MCP `apply_migration`（或主站仓库 CLI）执行已批准的 9 个 migration —— 依赖 2.2.0-1，**只执行该步骤批准的清单**（2026-08-16 完成，Production 28 个版本与 Git 前 28 条逐条匹配；不含 Git 第 29 条 pending migration）
-- [ ] ⬜ 用 Supabase MCP `apply_migration` 执行已批准的 `rls_auto_enable()` EXECUTE 收权 migration，然后用 `execute_sql` 复核四个角色的 `has_function_privilege(...)` 均为 `false` 且 `ensure_rls` event trigger 仍存在并启用 —— 依赖 2.2.0-1a
-- [ ] ⬜ 用 Supabase MCP `execute_sql` 验证 2.2.0-2 创建的 LOGIN 无表级权限、`SET ROLE games_api` 后只能 `EXECUTE` 白名单 RPC —— 依赖 2.2.0-1a、2.2.0-2
+- [x] 用 Supabase MCP `apply_migration`（或主站仓库 CLI）执行已批准的 9 个 migration —— 依赖 2.2.0-1，**只执行该步骤批准的清单**（2026-08-16 完成，Production 28 个版本与 Git 前 28 条逐条匹配；不含 Git 第 29/30 条 pending migration）
+- [x] 用 Supabase MCP `apply_migration` 执行已批准的 `rls_auto_enable()` EXECUTE 收权 migration —— 依赖 2.2.0-1a（2026-08-17 现场 spot-check 确认四个角色均无 EXECUTE；2026-08-21 `get_advisors` 复核未见该函数的 PUBLIC EXECUTE 告警残留）
+- [x] 用 Supabase MCP `apply_migration` 执行已批准的 migration 30（P2P 建房随机源修复）—— 依赖 2.2.0-1b（2026-08-21 用 `list_migrations` 确认 Production 已有全部 30 个版本，与 Git 逐条匹配）
+- [ ] ⬜ 用 Supabase MCP `execute_sql` 验证 2.2.0-2 创建的 LOGIN 无表级权限、`SET ROLE games_api` 后只能 `EXECUTE` 白名单 RPC —— 依赖 2.2.0-2
 - [ ] ⬜ 用 Vercel CLI/API 在 Games Vercel Project 配置 server-only 环境变量：`GAME_DATABASE_URL`（2.2.0-2 的 LOGIN，Transaction Pooler SSL URL，不进任何 `NEXT_PUBLIC_*`、不提交进 migration/Git，作为纯服务端 secret 单独管理）、`GAME_DATABASE_ROLE=games_api`、`GAME_WEB_ORIGIN=https://game.ningacademy.org`、`NINGACADEMY_MAIN_ORIGIN=https://ningacademy.org`、`GAME_STUN_URLS`、（可选）`GAME_TURN_URLS`/`GAME_TURN_USERNAME`/`GAME_TURN_CREDENTIAL` —— 依赖 2.2.0-2、2.2.0-3
 - [ ] ⬜ 用 Vercel CLI/API 确认 `game.ningacademy.org` 域名验证状态并完成 Vercel 侧绑定 —— 依赖 2.2.0-3、2.2.0-4
 - [ ] ⬜ 用 Vercel CLI/API 在主站 Vercel Project 配置 `GAME_LAUNCH_EXCHANGE_URL=https://game.ningacademy.org/redeem`，核对主站 CSP `form-action` 已指向该 origin —— 依赖 2.2.0-4
@@ -140,18 +181,20 @@
 
 #### 2.2.4 ⬜ AI 做 DB parity audit（复用 P-1 §1.2 流程，通过 Supabase MCP 独立完成，不需要用户重新手动跑一遍）
 
-- [ ] ⬜ 用 Supabase MCP `list_migrations` 核对 Production 已登记版本与 Git migration 清单一致
+- [x] 用 Supabase MCP `list_migrations` 核对 Production 已登记版本与 Git migration 清单一致（2026-08-21：30/30 精确匹配，见 §2.2.0-1b）
 - [ ] ⬜ 逐字节核对 `20260815180000_game_session_identity_v2.sql`、`20260815200000_game_p2p_signaling.sql` 两个文件——它们在最初部署前又经历过角色清理 bug 修复（见 §2.2.0-1 备注）——确认 Production 上实际生效的函数体/角色语句与当前 Git 版本一致，不是某次中间态
-- [ ] ⬜ 用 Supabase MCP `execute_sql` 重新导出 schema 关键对象（表/函数签名/RLS 策略/grant），与 P-1 报告基线 diff
-- [ ] ⬜ 用 Supabase MCP `get_advisors` 检查新出现的安全/性能告警
-- [ ] ⬜ 产出更新版 parity 报告，追加到 `docs/p1/` 或新的部署审计记录
+- [ ] ⬜ 用 Supabase MCP `execute_sql` 重新导出 schema 关键对象（表/函数签名/RLS 策略/grant），与 P-1 报告基线 diff——注意：GitHub Actions 的 protected audit（run `32098254600`，2026-08-17）已经做过一次这个级别的 diff，当时只剩一处已批准的 ACL drift（见 §2.2.0-1a），但那次运行发生在 migration 30 上线**之前**；需要针对当前 30/30 状态重新跑一次正式的 protected audit 才能作数（同一条待办）
+- [x] 用 Supabase MCP `get_advisors` 检查新出现的安全/性能告警（2026-08-21：83 条，57 条 `authenticated_security_definer_function_executable` + 26 条 `rls_enabled_no_policy`，全部落在这个项目一贯的 SECURITY DEFINER 约定与 `game`/`game_private`/`private` 未暴露 schema 上，均为 INFO 级、按设计如此；另有 1 条与本次改动无关的标准 `auth_leaked_password_protection` 建议；**没有发现任何与近期 migration 相关的新增告警**）
+- [ ] ⬜ 产出更新版 parity 报告，追加到 `docs/p1/` 或新的部署审计记录——`docs/p1/MIGRATION_DRIFT_REPORT.md` 已经承担了这个角色并持续更新，但仍缺一次针对 30/30 状态的正式 protected-audit CI 运行结果
 - 依赖：2.2.1 完成，可与 2.2.2/2.2.3 **并行**
 
 #### 2.2.5 ⬜ AI 修复发现的问题
 
 - [ ] ⬜ 冒烟测试（2.2.3）或 parity audit（2.2.4）发现的代码/配置问题直接修复并重新验证
 - [ ] ⬜ 若问题需要新的 Production DDL/DML（例如需要一条 forward-fix migration），AI 写出 migration 草稿，但**执行前必须回到 2.2.0-1 式的人工批准**——不得绕开审批直接对 Production 写入
-- [ ] ⬜ 修复记录追加到 `docs/project-status-rev2.1.md`
+- [ ] ⬜ Production 部署/审计修复记录追加到 `docs/project-status-rev2.1.md`（该文件已于 2026-08-21 更新当前 gameplay、验证结果和 Production 依赖；但本条所指的下一次 Production 部署/parity 修复记录尚未发生，因此保持未勾选）
+- [ ] ⬜ **新增**：把 `scripts/p1/approved-pending-migrations.mjs` 里 migration 30 的豁免条目清空，恢复 P-1 CI 的 Git-vs-Production 历史比对"必须逐条完全一致"的严格模式（见 §2.2.0-1b 遗留清理项）
+- [ ] ⬜ **新增**：针对当前 30/30 状态重新跑一次正式的 protected-audit CI（`p1-database-audit.yml` 的 `workflow_dispatch` production-read-only 分支），确认 IA-2-ACL 补丁在真实 CI 里也能清零 ACL diff
 - 依赖：2.2.3、2.2.4
 
 #### 2.2.6 发布门槛达成
@@ -163,35 +206,34 @@
 - [x] `npm run check:boundaries`：禁止浏览器代码引用 service-role/Claude 凭据、禁止 game-core 引用框架或浏览器全局、禁止追踪 `.env` 文件
 - [x] `npm run test:p2p-e2e`：8 个 Playwright browser context 覆盖 Host→7 peers
 - [ ] P2P fixtures 覆盖计划书 §6.1 要求的全部场景：create/join、无效/过期/满房、重复 peer、2–8 容量、membership、信令 TTL/cleanup、Host election、checkpoint 单调性、旧 topology signal 清除 —— **需要确认现有测试是否已覆盖全部子项，逐条补齐缺失用例**
-- [ ] 断言：`academic_terms` 排他约束允许同教师跨班级重叠、禁止同教师同班级重叠（主站仓库测试，需核对是否已写）
-- [ ] 断言：`game_assignment_versions` 的 `UPDATE`/`DELETE` 被触发器阻止（主站仓库测试，需核对是否已写）
+- [ ] 断言：`academic_terms` 排他约束允许同教师跨班级重叠、禁止同教师同班级重叠（主站仓库测试）—— **2026-08-21 核实：主站仓库 `**/*.test.ts` 与 `supabase/tests/` 下均无 `academic_terms` 相关测试，确认未写，不再是"待核对"**
+- [ ] 断言：`game_assignment_versions` 的 `UPDATE`/`DELETE` 被触发器阻止（主站仓库测试）—— **2026-08-21 核实：`supabase/tests/game_unlock_scheme_b.sql` 只测试了版本创建/切换流程，没有一条显式尝试直接 `UPDATE`/`DELETE` 该表并断言被拒绝的用例，确认未写，不再是"待核对"**
 
 ---
 
 ## 3. P1：单人核心垂直切片
 
 **前置依赖**：P0 代码层面完成（✅），不要求生产部署完成即可继续开发。
-**当前代码**：`packages/game-core/src/combat.ts`（878 行）+ `combat-types.ts` 已实现：平地图占位、单把 hitscan 步枪（`RifleState`：弹药/弹匣/下次开火 tick/换弹完成 tick）、单个 Thrall、Host 30Hz 权威 tick、250ms 命中历史缓冲、200ms rewind 窗口常量（`COMBAT_REWIND_WINDOW_MS`）。
+**当前代码**：`packages/game-core/src/combat.ts`（895 行）+ `combat-types.ts` 已实现：平地图占位、单把 hitscan 步枪（`RifleState`：弹药/弹匣/下次开火 tick/换弹完成 tick）、单个 Thrall、Host 30Hz 权威 tick、250ms 命中历史缓冲、**250ms** rewind 窗口常量（`COMBAT_REWIND_WINDOW_MS`，`combat-types.ts:5`——本节此前一直误写成"200ms"，2026-08-21 复核代码后订正）。
 
-### 3.1 待完成开发项
+### 3.1 对抗性开发项 —— 2026-08-21 已逐条关闭（`combat.ts` 895 行 / `combat-types.ts` 181 行 / `combat.test.ts` 466 行）
 
-- [ ] **确认并补齐"拒绝非法输入"的对抗性规则**（计划书 P1 验收标准逐条核对）：
-  - [ ] peer 发送瞬移（超出物理可能的位移）指令 → Host 拒绝或裁剪，写单元测试
-  - [ ] peer 发送伪造击杀事件（客户端直接声称命中）→ Host 忽略，只信任自己模拟的判定
-  - [ ] peer 超射速开火（绕过 `nextFireTick`）→ Host 丢弃超额请求并计数
-  - [ ] 无弹药情况下开火请求 → Host 拒绝，不消耗弹药，不产生伤害
-  - [ ] peer 尝试直接提交/覆盖权威 world state（而不是 input/intent）→ 协议层拒绝
-- [ ] 核对 `CombatRuleErrorCode` 是否已覆盖以上全部拒绝路径（现有：`COMBAT_NOT_STARTED` / `COMBAT_PLAYER_INACTIVE` / `INPUT_EXPIRED` / `INPUT_SEQUENCE_REPLAY` / `INVALID_COMBAT_COMMAND` / `INVALID_MOVEMENT` / `WEAPON_UNAVAILABLE`），缺失的补上
+- [x] **peer 发送瞬移指令 → 已实现且已测试**：`combat.input` 协议本来就没有 position 字段（只有移动/瞄准意图，`combat-types.ts:85-94`），多出的 `position` 字段会被精确字段检查拒绝为 `INVALID_COMBAT_COMMAND`（`combat.ts:76-91`，测试见 `combat.test.ts:112-125`）；`isValidMovementTransition()`（`combat.ts:857-878`）另外对存档/恢复场景做位移裁剪（测试 `combat.test.ts:135,160`）
+- [x] **peer 发送伪造击杀事件 → 结构性满足且已有回归测试**：`combat.fire` 载荷只有 `shotSequence`/`clientShotTimeMs`，`hit` 永远由 Host 的历史采样与射线计算；测试还把伪造的 `combat.entity_killed` 载荷直接送入 reducer，断言 `INVALID_COMBAT_COMMAND` 且 combat 引用完全不变
+- [x] **peer 超射速开火（绕过 `nextFireTick`）→ 已测试**：射速间隔内第二枪返回 `WEAPON_UNAVAILABLE`，不消耗弹药、不改变 Thrall HP、不发事件
+- [x] **无弹药情况下开火请求 → 已测试**：空弹状态开火返回 `WEAPON_UNAVAILABLE`，权威 state 引用不变、弹药保持 0、Thrall HP 不变
+- [x] **peer 尝试直接提交/覆盖权威 world state → 已实现且已测试**：`HostP2PAuthorityRuntime.processCommand` 的执行者身份完全来自信令通道本身，从不读取载荷字段，伪造 membership 会直接抛错（`packages/authority/src/host-p2p-authority.ts:65-71`，测试 `host-p2p-authority.test.ts:18-23`）；`RemoteAuthority` 发送端也没有任何客户端可控的身份字段（`authority.test.ts:73-107`）；`CombatCommand` 联合类型里本来就没有"设置状态"这种变体
+- [x] `CombatRuleErrorCode` 现状核实：`COMBAT_NOT_STARTED` / `COMBAT_PLAYER_INACTIVE` / `INPUT_EXPIRED` / `INPUT_SEQUENCE_REPLAY` / `INVALID_COMBAT_COMMAND` / `INVALID_MOVEMENT` / `WEAPON_UNAVAILABLE`（`combat-types.ts:151-158`）——与文档原记录一致，没有新增，本轮复核未发现遗漏路径需要新错误码
 
 ### 3.2 测试与验证（可与 3.1 并行编写）
 
-- [ ] 单元测试：固定种子下 Host 与 `LocalAuthority` 的模拟结果逐 tick 完全一致（确定性回归测试）
-- [ ] 单元测试：200ms rewind 窗口边界值（199ms 接受 / 201ms 拒绝或按窗口裁剪）
+- [ ] 单元测试：固定种子下 Host 与 `LocalAuthority` 的模拟结果逐 tick 完全一致（确定性回归测试）—— **2026-08-21 核实仍缺**：现有的只有 game-core 内部同种子双跑对比（`combat.test.ts:347-363`）和 checkpoint 相等性测试（`host-p2p-authority.test.ts:35-41`），没有一条真正把 Host 与 `LocalAuthority` 并排跑并逐 tick diff 的测试
+- [ ] 单元测试：**rewind 窗口边界值**（249ms 接受 / 251ms 拒绝或按窗口裁剪——常量实测是 250ms，见本节开头订正）；现有只有一条笼统的"拒绝过老的一枪"测试（`combat.test.ts:237-259`），没有精确到边界值的用例
 - [ ] 压力测试：单房间连续运行验证无 tick 漂移 / 无内存泄漏（为后续 30 分钟 VFX soak 测试打基础，见 §17.8）
 
 ### 3.3 验收 Gate（对照计划书 P1 行）
 
-- [ ] "peer 只能 input/intent，拒绝权威状态覆盖、瞬移、伪造击杀、超射速和无弹药射击" —— 全部有对应自动化测试且全部通过后，方可进入 P4/P5 的引擎接线工作（P4/P5 会复用同一套 Host 权威校验模式）
+- [x] "peer 只能 input/intent，拒绝权威状态覆盖、瞬移、伪造击杀、超射速和无弹药射击" —— 五类对抗路径均已有自动化测试并通过。注意这只关闭 P1 的这一个 Gate，不会把 §3.2 的确定性、rewind 边界或 soak 自动标成完成。
 
 ---
 
@@ -212,15 +254,15 @@
 
 ### 4.2 待完成开发项 —— 场景与网络预测
 
-- [ ] Babylon.js 场景搭建：加载 `model-asset-registry.ts` 中已注册的静态模型（Thrall / 幸存者 / Boss / 步枪）
-- [ ] 客户端预测（client-side prediction）：本地玩家输入立即在本机模拟位移，等待 Host snapshot 校正
-- [ ] Reconciliation：收到 Host snapshot 后回滚重放未确认的本地输入
-- [ ] 远端玩家插值（remote interpolation）：其他玩家位置基于 15Hz snapshot 平滑插值
-- [ ] 手机触控输入：横屏双摇杆、按钮、安全区适配、轻度瞄准减速、小范围可见目标磁吸（明确**不做**自动开火、穿墙锁定）
+- [x] **Babylon.js 基础场景搭建（单人 + 多人 greybox 内容）**：单人继续由 `practice-arena.tsx` 渲染；多人 `running` 房间由 `multiplayer-game.tsx`/`multiplayer-arena.tsx` 消费 Host snapshot，渲染本机 FP、远端 TP、deterministic greybox tiles/bounds/cover、多个 Thrall、权威 HP/弹药/死亡/重生与 enemy spawn/despawn。仍不包含正式地图资产、Boss、loot 或完整 Day。
+- [x] 客户端移动预测（client-side prediction）：`MultiplayerPresentationTimeline.queueLocalInput()` 使用与 Host 相同的纯移动 integrator 立即推进本机位置；不会预测伤害、HP、弹药、命中或重生
+- [x] Reconciliation：新 Host snapshot 到达后按 `authoritative.input.sequence` 丢弃已确认输入，并从权威 survivor 状态重放仍待确认的输入；旧 revision 和错房间快照直接丢弃
+- [x] 远端实体插值（remote interpolation）：远端幸存者与 stable-id enemy collection 在约 100ms 展示延迟上对相邻 Host snapshot 做位置插值；权威 membership/enemy collection 是 render spawn/despawn 的唯一来源
+- [ ] 手机触控输入：横屏双摇杆、按钮、安全区适配、轻度瞄准减速、小范围可见目标磁吸（明确**不做**自动开火、穿墙锁定）—— 2026-08-21 复核：没有任何摇杆组件，只有一处与触控无关的 CSS safe-area 用法（`apps/web/src/app/globals.css:34`，页面内边距）
 - [ ] 结晶裂纹/碎裂表现接入 shader（美术已给出裂纹遮罩通道规范，见资产清单 §0.4）
-- [ ] **音频总线拆分为 `learning` / `world` 两条**（为 P3 §4.5.3 听力静音做准备，当前代码未发现音频总线实现）
+- [ ] **音频总线拆分为 `learning` / `world` 两条**（为 P3 §4.5.3 听力静音做准备）—— 2026-08-21 复核仍未找到任何音频总线/mixer 实现
 
-### 4.3 R2 资产管线（AI 可通过 Cloudflare API/`wrangler` CLI 执行，仅域名绑定需要 §2.2.0-4 的 DNS 授权）
+### 4.3 R2 资产管线（AI 可通过 Cloudflare API/`wrangler` CLI 执行，仅域名绑定需要 §2.2.0-4 的 DNS 授权；2026-08-21 复核：仓库内无 `wrangler.toml`、无任何 R2/Worker 相关脚本，确认这整节仍是零起点）
 
 - [ ] ⬜ 用 Cloudflare API/`wrangler` CLI 创建四个 R2 bucket：`ning-game-assets`、`ning-game-checkpoints`、`ning-game-replays`、`ning-game-anticheat`
 - [ ] ⬜ 为四个 bucket 分别创建**独立**、最小权限的 R2 API token，互不可读
@@ -241,7 +283,8 @@
 
 ### 4.5 测试与验证
 
-- [ ] 预测/reconciliation 单元测试：模拟输入延迟、丢包场景下客户端与 Host 最终收敛一致
+- [x] 预测/reconciliation 核心单元测试：旧/错房 snapshot 丢弃、远端玩家/多敌人插值、本地立即预测、Host 确认输入后回到权威位置、membership/enemy despawn 清理、tombstone 防复活、stale wave revision 拒绝、Host+多 Peer 同 world view（`multiplayer-presentation.test.ts`）
+- [ ] 网络条件收敛测试：模拟 0/75/150/200ms RTT、jitter、2% 丢包和旧 snapshot 积压，断言客户端最终与 Host 收敛；当前核心时间线测试不能代替这条网络 E2E
 - [ ] 目标设备性能门槛：Iris Xe 720p / GTX1650 1080p 帧时预算测试（详见 §17.8，暂缓到有可玩场景后执行）
 - [ ] 手机触控 E2E：至少在一台真实中端安卓设备与一台 iOS 设备上验证安全区与摇杆响应
 
@@ -260,13 +303,13 @@
 
 ### 5.2 待完成开发项 —— 判题与幂等
 
-- [ ] Games API 幂等判题：同一 `question_instance_id` + `request_id` 重复提交返回同一结果，不重复计分（`AnswerGradedMessage.duplicate` 字段已预留，需要接后端持久化）
+- [ ] Games API 幂等判题：同一 `question_instance_id` + `request_id` 重复提交返回同一结果，不重复计分（`AnswerGradedMessage.duplicate` 字段已确认存在，`packages/protocol/src/learning.ts:69`；**2026-08-21 复核发现范围比原记录更大**：`SubmitAnswerMessage`/`AnswerGradedMessage` 目前只在 `packages/protocol` 内部和测试/文档里出现，`apps/web` 没有任何路由/server 代码引用它们——判题接口本身还没有任何后端实现，不只是缺持久化）
 - [ ] 四类题型的实际出题来源接入：英译中 / 中译英 / 英语听力拼写 / 数学（计算、填空、判断）
 - [ ] 错题复习调度：同一 Day 不重复，至少间隔 5 题，按 1/3/7 天复习节奏（不改写首答）
 - [ ] accommodation（1×/1.5×/2×/无时限）在题目下发时的时限计算与应用；"无时限"在实时救援中按 2× 处理，其他题目真正无时限
 - [ ] 题目隐私：同房不同玩家的题面/答案/Tier/策略互不广播（协议已设计为单播 `QuestionPresentedMessage`，需要在房间广播逻辑里确认真正做到不广播给其他 peer）
 
-### 5.3 待完成开发项 —— §4.5.1 答题保护（当前 game-core 无 Day/Boss 概念，需与 P5 联合开发）
+### 5.3 待完成开发项 —— §4.5.1 答题保护（当前 game-core 无 Day/Boss 概念，需与 P5 联合开发；2026-08-21 复核：`combat.ts` 目前只有固定的 `rifleDamage: 50`/`thrallAttackDamage: 8` 等常量，没有任何答题窗口相关的伤害倍率逻辑，本节仍是从零开始）
 
 - [ ] 定义"答题窗口"起止时间点（题面下发显示 → 提交或倒计时归零），在 Host tick 层面打标记
 - [ ] 窗口内玩家受到伤害 ×0.10（普通敌人/Boss 召唤物）
@@ -284,7 +327,7 @@
 - [ ] 确认这是纯本地表现层行为，不影响 Host 时钟/伤害判定/AI/配额（写测试验证暂停音频时 Host tick 仍在推进）
 - [ ] 视觉信息（字幕/命中提示/弱点轮廓）在静音期间正常显示
 
-### 5.5 待完成 —— 听力音频管线（消除答案泄露信道，§4.8.2；AI 可通过代码+Cloudflare CLI 执行，仅生产自定义域路由依赖 §4.3 的 DNS 授权）
+### 5.5 待完成 —— 听力音频管线（消除答案泄露信道，§4.8.2；AI 可通过代码+Cloudflare CLI 执行，仅生产自定义域路由依赖 §4.3 的 DNS 授权；2026-08-21 复核：仓库内未发现任何 `HMAC`/`content_release_salt`/Worker 代码，确认这整节仍是零起点）
 
 - [ ] ⬜ 对象 key 生成：`base32(HMAC-SHA256(content_release_salt, word_id || voice_id || variant))[0:32]`
 - [ ] ⬜ `content_release_salt` 只存在于 `game_private`，每次内容发布轮换，不进客户端、不进 CI 制品
@@ -310,6 +353,8 @@
 ## 6. P4：卡牌 DSL 与内容引擎接线
 
 **前置依赖**：P1 §3.3 Gate 通过。**这是当前最值得优先投入的阶段**——内容数据已经领先，只差把 260 张卡的 `effects`/`activationPolicies`/`acquisition` 接进 game-core 的 reducer。
+
+> 2026-08-21 复核：`packages/content/src` 逐文件核对，与上一版记录完全一致——`catalog-source-s121-s160.ts` 仍止于 S160，仓库内没有任何 S161/S162 文件；四个 `catalog-source-s0*.ts` + 两个 `catalog-source-z0*.ts` 精确合计 260 张（160 幸存者 + 100 僵尸），不是 262。game-core 本轮新增 map/wave 文件，但仍没有 card runtime；对 "mechanism slot"/"proc_budget"/"card_state" 的检索仍是零匹配。
 
 ### 6.1 已完成
 
@@ -365,6 +410,8 @@
 
 **前置依赖**：P4 卡牌引擎基本接线完成（Day 状态机需要在 `ZOMBIE_CARD` 节点调用卡牌系统）。**Boss 美术资产已就绪，不阻塞引擎开发。**
 
+> 2026-08-21 最新实现：game-core 已有独立于完整 Day 的最小 `WaveDirectorState`，可确定性安排普通 Thrall、多实体清空后进入 break、再递增下一 Wave；这是未来 `QUOTA_COMBAT` 的可扩展底座。`Day`/`DAY_START`/`ZOMBIE_CARD`/`BOSS_TRANSITION`/`BossController`/`AIController` 仍未实现，不能把最小 Wave 当作 §7.2 Day 状态机完成。`scripts/verify-model-assets.mjs` 的跨 Boss URI 两两不相交断言也仍待加强。
+
 ### 7.1 已完成 —— Boss 美术资产（独立性已通过 CI 校验）
 
 - [x] 4 个 Boss（猎袭者 Hunter / 巢群者 Swarm / 疫化者 Plague / 铁壳者 IronShell）各自独立 GLB + Skeleton + 动画 + 材质 + manifest + QA report，**零共享母体**
@@ -377,6 +424,7 @@
 
 ### 7.2 待完成开发项 —— Day 状态机（game-core 目前完全没有 Day 概念）
 
+- [x] 最小权威 Wave 底座：wave number/kind/phase/revision、remaining、确定性 spawn seed/schedule/zone selection、start/complete、break timer、下一 Wave 数量/HP 递增；明确不含完整 Day/Supply/Boss 语义
 - [ ] 在 `GameState` 新增 Day 相关字段：当前 Day、equivalentDay（按地图系数换算）、当前状态机节点、普通怪配额进度、僵尸卡历史
 - [ ] 实现固定状态机：`DAY_START → ZOMBIE_CARD → QUOTA_COMBAT → QUOTA_CLEANUP → BOSS_TRANSITION → BOSS_COMBAT → SUMMON_CLEANUP → RESCUE_RESOLUTION → DAY_END_CHECKPOINT`
 - [ ] `DAY_START` 保底正式题：每 Day 固定下发 1 道正式限时题，与卡牌完全解耦，答对无奖励/答错不扣血只记录，计入作业最低题量与段位正确率（依赖 P3 判题接线）
@@ -419,16 +467,18 @@
 
 ---
 
-## 8. P6：地图模块（⬜ 完全未开始 —— 重点关注）
+## 8. P6：地图模块（🔄 deterministic greybox 基础完成）
 
 **前置依赖**：无强依赖，**可以立即开始**，且不依赖 P4/P5 引擎进度。**强烈建议尽早排期**，因为 P9/P10 的联机压测、P5 的 Boss 场空间验证都需要真实地图才能测试，目前这些测试项事实上被 P6 阻塞。
+
+> 2026-08-21 最新实现：`packages/game-core/src/map-layout.ts` 与多人 Babylon 场景已接入固定 canonical 5×5 greybox、`layoutHash`、模块 placements、player/enemy spawn、navigation graph/bounds、碰撞体和 Supply/Boss 预留区。它解决 Host/Peer/late snapshot 的确定性世界骨架；`apps/web/public/game/` 仍没有四生态正式 map GLB/tile 资产，Blender→navmesh/collision 预烘焙与资源预算管线仍是待办。
 
 ### 8.1 ⚠️ 待设计 —— 先定规范（计划书原文强调"规范没定就开工，P6 会全部返工"）
 
 - [ ] 确定网格规范：单格 8m × 8m，墙高 4m，门洞宽 2.4m × 高 2.8m，连接口居中、同一尺寸同一高度同一朝向
 - [ ] 确定 trim sheet 贴图规范：每生态 2×2048 共享贴图
 - [ ] 确定碰撞体与 navmesh 的预烘焙工具链（Blender 导出规范，需要和现有 `build_boss_assets.py` / `build_weapon_assets.py` 的资产管线保持一致）
-- [ ] 确定 `layout_hash` 计算算法与校验时机
+- [x] 确定 greybox `layout_hash` 算法与校验时机：规范化 metadata JSON → FNV-1a 32；snapshot decode、peer presentation 与 checkpoint restore 均拒绝 hash/版本不匹配
 
 ### 8.2 待制作 —— 每生态至少 4 类模块（房间/走廊/开阔地/Boss 场），实际约 12–16 个模块/生态
 
@@ -440,16 +490,18 @@
 
 ### 8.3 待完成开发项 —— 生成器与校验
 
-- [ ] 模块化预制布局组合生成器：只决定"哪个预制模块放在整数网格哪一格、朝哪个方向（0/90/180/270）"，不生成几何体
-- [ ] Host 保存并下发的地图元数据结构：`seed / generator_version / canonical_layout_id / collision_layout_id / layout_hash / asset_manifest_id / module_placements[]`
-- [ ] peer 端 `layout_hash` 本地计算与比对，不一致时拒绝进入并提示"资源版本不匹配，请刷新"（**不允许降级进入**）
+- [x] 最小 canonical greybox 布局生成器：只决定 5×5 整数网格的 module id/placement/0–270° rotation；Babylon 从本地 primitives 重建，不联网传 geometry（正式四生态组合生成器仍待 §8.2 资产）
+- [x] Host 保存并下发的地图元数据结构：`seed / generator_version / canonical_layout_id / collision_layout_id / layout_hash / asset_manifest_id / module_placements[]`
+- [x] peer 端 `layout_hash` 本地计算与比对，不一致时拒绝进入并提示"资源版本不匹配，请刷新"（**不允许降级进入**）
 - [ ] `generator_version` 递增机制，旧存档在支持窗口内继续用旧版本模块包（对照 §3.7.4 current/N-1 约束）
-- [ ] 发布前自动验证脚本：连通性、导航可达性、出生点合法性、Boss 场空间、安全复活点、资源预算（大厅 ≤15MB、选定生态 ≤50–60MB、完整生态 ≤80MB、手机低档 ≤45MB）
+- [x] game-core greybox 自动验证：navigation graph 连通、节点/玩家出生/敌人 zone 可达、碰撞边界与 layout hash；纳入 Vitest
+- [ ] 正式地图发布验证：预烘焙 navmesh、Boss 场/安全复活点语义与资源预算（大厅 ≤15MB、选定生态 ≤50–60MB、完整生态 ≤80MB、手机低档 ≤45MB）
 
 ### 8.4 测试与验证
 
-- [ ] `layout_hash` 不匹配必须拒绝进入，不得降级进入（网络测试项，对照 §6.4）
-- [ ] 连通性/导航可达/出生点/Boss 场空间/安全复活点/资源预算自动验证全部通过
+- [x] `layout_hash` 不匹配必须拒绝进入，不得降级进入（protocol + map validation 自动测试）
+- [x] canonical greybox 确定性、navigation graph 连通、玩家/敌人出生合法、共享碰撞、Supply/Boss 预留区自动测试通过
+- [ ] 正式四生态的 Boss 场空间、安全复活点和资源预算自动验证全部通过
 - [ ] 四生态视觉风格逐一人工评审（形状/裂纹/音色差异，不能只换颜色）
 
 ---
@@ -464,7 +516,7 @@
 - [x] 狙击枪镜片独立网格+材质（ADS 渲染镜内画面）已按规格制作（需人工核对最终 GLB 是否满足此要求）
 - [x] 进阶武器链阶段 1/2 模型：光剑（原型/完整体两阶段+完全体三阶段均已交付）、激光枪（基础+Fusion 两阶段）、等离子炮（基础+Singularity 两阶段）、元素法杖（基础+奇点两阶段）
 
-### 9.2 待完成开发项 —— 分武器族命中验证引擎（当前 game-core 仅实现基础 hitscan 单发步枪）
+### 9.2 待完成开发项 —— 分武器族命中验证引擎（当前 game-core 仅实现基础 hitscan 单发步枪；2026-08-21 复核：`combat-types.ts` 里 `RifleState` 仍是唯一的武器类型，全仓库对 `sniper|SMG|spear|sword|melee|parry|block|ADS|WeaponFamily` 的检索零匹配——本节内容无变化，5 把起始武器美术资产仍确认在 `apps/web/public/game/models/weapons/starter/` 与 `WEAPONS_Catalog_v01.json` 中就位）
 
 - [ ] **狙击枪**：hitscan 单发；Host 校验 ADS 时长、移动速度、开火间隔、后坐恢复；200ms rewind
 - [ ] **突击步枪**：hitscan 连发；射速节流；**扩散状态机由 Host 权威计算**，peer 只做视觉预测；Host 最多 200ms rewind（当前 `RifleState` 已有基础字段，需要扩展扩散状态机）
@@ -498,7 +550,7 @@
 - [x] 5 名幸存者角色美术（Warrior/Medic/Mage/Assassin/Guardian）
 - [x] 职业解锁答题规则数据（`role-gate.ts`）：首个免费，其他需 10 题 ≥60% 首答正确率；已解锁职业每次开局需 1 道确认题
 
-### 10.2 待完成开发项 —— 幸存者技能引擎（当前完全未实现）
+### 10.2 待完成开发项 —— 幸存者技能引擎（当前完全未实现；2026-08-21 复核：`packages/game-core/src`、`packages/authority/src` 对 `Warrior|Medic|Guardian|Assassin`/`skill|ability|cooldown` 的检索零匹配；`role-gate.ts` 只有 `nameEn/nameZh/unlockQuestionCount/summaryEn/summaryZh` 五个字段，没有技能/冷却/数值——本节内容无变化）
 
 共同基准 100 HP/20 护甲，5 职业各 2 个主动技能，逐一实现：
 
@@ -537,7 +589,7 @@
 
 **前置依赖**：P6 地图模块（真实联机测试需要地图）+ P5 Day/Boss 引擎基本可用 + P7/P8 基础战斗可用。信令基础设施（P0）已就绪。
 
-### 11.1 已完成 —— 信令与拓扑层
+### 11.1 已完成 —— 信令、拓扑与基础 P1 多人战斗
 
 - [x] Host + 最多 7 peers 星形拓扑
 - [x] 独立 ACL 校验（作业局校验 `assignment_targets`，自由局校验邀请 ACL/同班级）—— 需要核对是否已在 `join_p2p_room_v1` 完整实现（见 §16.1 安全检查）
@@ -546,10 +598,20 @@
 - [x] 5 秒检查点持久化
 - [x] 确定性 Host election（按 `joined_at, member_id`）、topology epoch 重连
 - [x] 8-browser Playwright 测试覆盖上述拓扑层
+- [x] 房间进入 `running` 后切换到真实 Babylon 多人场景，而不是继续停留在大厅
+- [x] Host 与 peer 均只提交移动/瞄准/开火/换弹意图；Host 30Hz 模拟并权威结算移动、敌人、命中、伤害、HP、弹药、死亡与重生
+- [x] 本机 FP、远端 TP 幸存者/步枪、Thrall 动画与权威 spawn/despawn 已接线；永久 leave 移除 combat/history 实体，临时 disconnect 保留重连状态
+- [x] 本地移动预测、Host reconciliation、远端幸存者/Thrall 插值已接入；旧 revision 快照不会回滚展示状态
+- [x] 单 Thrall 升级为 stable `entityId` enemy collection；Host-only spawn/despawn、AI/target、HP/death，peer presentation-only；全部敌人按 snapshot 插值并清理
+- [x] 最小多人 Wave 状态同步：Host 权威 wave number/kind/phase/revision、remaining、spawn schedule/seed/selection、start/end 与 break；peer HUD 显示相同 Wave/敌人数
+- [x] snapshot 携带并校验 topology epoch、room/revision、map hash、enemy/wave revision；enemy tombstone 防止迟到快照复活已 despawn 实体
+- [x] checkpoint 单元 round-trip 覆盖 deterministic map + enemy collection + Wave 状态；Host/多 Peer presentation 一致性与 Host→7 peers 同 world-summary Playwright 通过
 
-### 11.2 待完成开发项 —— 合作玩法层（当前 game-core 无多人 Day 共享状态）
+### 11.2 待完成开发项 —— 高级合作玩法层（基础 P1 多人战斗已完成，但 game-core 仍无多人 Day 共享状态；`PAUSE_GRANTED`/`REQUEST_PAUSE`/五小时强休相关命名全仓库零匹配，`rescue`/`revive` 仍只在协议/内容标签中出现，与救援租约玩法无关。所以下列 Day/救援/暂停/长时会话系统仍是零起点，不能因基础战斗可玩而勾选）
 
 - [ ] Day 状态在多人房间内共享推进（依赖 P5 Day 状态机扩展到多玩家）
+- [ ] 完整 late join world reconstruction：认证入场后用当前 map/enemy tombstones/Wave/玩家状态构建同一世界，并验证期间发生 spawn/despawn 时的无缝收敛
+- [ ] 完整 reconnect 与 Host migration gameplay restoration：恢复 pending authority/channel、地图/敌人/Wave/玩家战斗状态；checkpoint 版本不支持或恢复失败时安全终止，不能假装成功
 - [ ] 救援系统完整实现（详见 §11.3，工作量较大，单列）
 - [ ] checkpoint restore 失败时的安全终止路径（不假装成功恢复，明确提示用户）
 - [ ] 5 小时强制休息：每 5 小时连续游玩，Host 检查点后展示"休息一下吧，已经玩很久了"并强制退出；认证/休息租约/重连/Host 心跳时钟**不**因暂停/慢动作/cinematics 而暂停
@@ -605,6 +667,8 @@
 ## 12. P10：非对称对抗
 
 **前置依赖**：P9 合作玩法（救援/暂停）完成 + P5 Boss 引擎完成 + P8 职业引擎完成。**不新增 Boss 模型**，直接复用 P5 的 4 个 Boss 接 `PlayerController`。
+
+> 2026-08-21 复核：`packages/game-core/src`、`packages/authority/src`、`apps/web/src` 对 `respawnDelay|bossScale|CLAIM_ULTIMATE|CLAIM_CONTROL|dayContribution|zombiePlayer` 的检索零匹配；`infection` 相关命中全部是卡牌内容的学习扣分资源标签（如 `onFailure: "lose_card_and_10_infection_points"`），与本节的僵尸玩家身体/生命数/感染点机制无关。本节"100% 未开始"判断不变。
 
 ### 12.1 待完成开发项 —— 僵尸玩家身体与生命
 
@@ -667,17 +731,17 @@
 - [x] 学生可启动已发布游戏作业（launch ticket 流程，见 P0 §2.1）
 - [x] 撤销传播触发器（登出/改密/停用/强改密/转教师/解锁版本替换）已接入 `revoke_game_sessions_v1`
 
-### 13.2 待完成开发项（主站仓库）
+### 13.2 待完成开发项（主站仓库；2026-08-21 逐条核实，与上一版记录一致，均确认仍未接线）
 
-- [ ] **教师游戏报告 UI**（`get_teacher_game_report_v1` RPC 已在权限白名单里，但前端页面未接线 —— 需要新建 `/teacher/game-reports` 或类似路由）
-- [ ] **教师 accommodation 配置 UI**（视觉安全上限/计时策略，写入 `game_assignment_versions.frozen_config`，学生只能进一步降低——RPC `set_game_assignment_accommodation_v1` 已在白名单，前端未接）
-- [ ] **班级内非对称配对场次入口**：教师在游戏中心创建练习场次，指定班级/时间窗/目标比例，系统在已报名学生中按 1v1/2v1/3v1 自动组队开房（依赖 P10 §12.6 的验证胜场统计逻辑先跑通）
-- [ ] 教师临时关闭学生游戏权限的入口（若尚未有专门 UI，需要确认是否已经复用现有账号停用机制或需要新建）
+- [ ] **教师游戏报告 UI**（`get_teacher_game_report_v1` RPC 已在权限白名单里，但前端页面未接线——`app/teacher/assignments/` 下确认没有匹配 `game-report` 的路由，`app/` 内对该 RPC 名的检索零匹配，需要新建 `/teacher/game-reports` 或类似路由）
+- [ ] **教师 accommodation 配置 UI**（视觉安全上限/计时策略，写入 `game_assignment_versions.frozen_config`，学生只能进一步降低——RPC `set_game_assignment_accommodation_v1` 已在白名单，`app/` 内对该 RPC 名检索零匹配，`game-unlock-requirements-form.tsx` 里也没有对应控件，前端确认未接）
+- [ ] **班级内非对称配对场次入口**：教师在游戏中心创建练习场次，指定班级/时间窗/目标比例，系统在已报名学生中按 1v1/2v1/3v1 自动组队开房（依赖 P10 §12.6 的验证胜场统计逻辑先跑通；全仓库对"asymmetric matchmaking"类描述检索零匹配，确认未做）
+- [ ] 教师临时关闭学生游戏权限的入口（教师作业 UI 内未发现停用/暂停/撤销类控件，确认仍需新建或明确复用现有账号停用机制）
 - [ ] 学生个人段位/分项学习报告页面（依赖 P12 段位计算引擎完成后才有数据可展示）
 
 ### 13.3 待完成开发项（Games 仓库）
 
-- [ ] 学生/教师"游戏中心"页面深化（当前 `apps/web/src/app/page.tsx` 为大厅占位，需要确认现有实现深度并补齐导航、房间列表、个人进度展示）
+- [ ] 学生/教师"游戏中心"页面深化 —— **2026-08-21 核实，比原记录更靠前**：`apps/web/src/app/page.tsx` 不是纯占位，已经渲染 hero + `<MultiplayerLobby/>` + 单人练习 `<GameCanvas/>`；`multiplayer-lobby.tsx` 实现了真实的 WebRTC 建房/加房流程（房间码输入、8 人容量上限、host/menu/connecting/room 多状态，经由 `P2PApiClient`/`WebRtcStarNetwork`）。仍然缺：房间列表/浏览、个人进度或完成情况展示、班级/作业维度的仪表盘——这条待办收窄为"补齐列表与进度展示"，不是"从占位开始建"
 - [ ] 题源与临时关闭权限在 Games 侧的响应逻辑（收到主站撤销信号后的 UI 反馈）
 
 ### 13.4 测试与验证
@@ -703,7 +767,7 @@
 - [ ] 段位仅在对局永久结算时重算，检查点/5 小时休息/中途保存不重算
 - [ ] 答错降低滚动正确率，可能在最终结算时降段
 
-### 14.3 待完成开发项 —— 日志脱敏（字段白名单，当前 Games 代码未发现相关中间件）
+### 14.3 待完成开发项 —— 日志脱敏（字段白名单；2026-08-21 复核：两个仓库检索 "redact"/"redacted:len" 均零匹配，唯一相关的 `flash-governor.ts` 是客户端闪光频率治理，与日志无关——确认两个仓库都没有相关中间件）
 
 - [ ] 结构化日志白名单机制（不是黑名单）：`ticket`/`token`/`cookie`/`set-cookie`/`authorization`/`answer`/`answer_hash`/`question_text`/`audio_url`/`sdp`/`candidate` 永不进日志（Main Vercel、Games Vercel、浏览器诊断、Postgres 分别配置）
 - [ ] 序列化中间件在写出前按 key 替换为 `[redacted:len=N]`
@@ -744,7 +808,7 @@
 
 ### 15.1 待完成开发项 —— 内容与资产收尾
 
-- [ ] 进阶武器阶段 3（laser/plasma/staff，依赖 §9.3 的设计决策先做出）全部完成
+- [ ] 进阶武器阶段 3（laser/plasma/staff，依赖 §9.3 的设计决策先做出）全部完成 —— 2026-08-21 复核：三个 `SPEC_PENDING.md` 占位文件仍分别存在于 `laser_stage3`/`plasma_stage3`/`staff_stage3` 目录下，设计决策仍未做出
 - [ ] 全部消耗品/部署物最终接入引擎（美术已交付，见 §4.4）
 - [ ] `LocalAuthority` 离线练习模式完整可玩（依赖全部引擎系统接线完成）
 
@@ -779,7 +843,7 @@
 - [ ] 逐函数校验：`SECURITY INVOKER/DEFINER`、owner、`FORCE ROW LEVEL SECURITY`、`games_api` 零表权限、`game_private` 无 USAGE、旧运行时角色零执行权限、票据双兑换竞态、答案幂等、退出撤销、作业类型分派
 - [ ] 断言：含 `DROP COLUMN`/`DROP FUNCTION` 的 migration 必须声明已下线的合同版本号
 
-### 16.1 ⬜ 待开发 —— 限速中间件（当前未发现实现）
+### 16.1 ⬜ 待开发 —— 限速中间件（2026-08-21 复核：`apps/web/src` 内对 middleware/429/Retry-After 等限速相关代码的检索零匹配，确认仍未实现）
 
 - [ ] 账号维度：登录 10/5分钟递增退避；签发票据 6/分钟；兑换票据 6/分钟；房间码尝试 10/10分钟锁定30分钟；信令发送 120/分钟（重复 SDP/ICE 幂等去重）
 - [ ] peer 维度：高频 input 30/秒（Host 丢弃计数）；可靠命令 10/秒（Host 拒绝计数）；总量 64/秒硬上限（Host 关闭该 peer）
@@ -829,24 +893,29 @@
 ## 18. 跨阶段：部署与环境配置清单（汇总，标注哪些是 🚫 用户授权、哪些是 AI 可执行，避免散落漏项）
 
 - [x] 🚫 Production migration 最终审批（9 个 migration，见 §2.2.0-1）—— 已完成 2026-08-16
-- [x] ⬜ Production migration 实际执行（见 §2.2.1）—— 已完成 2026-08-16，Production 28 个版本与 Git 前 28 条逐条匹配
-- [ ] 🚫 **`rls_auto_enable()` EXECUTE 收权 migration 审批**（见 §2.2.0-1a）—— migration 已起草、P-1 clean replay CI 已通过（run #39，2026-08-17），**只差你批准执行到 Production**
-- [ ] ⬜ `rls_auto_enable()` migration 实际执行（见 §2.2.1，AI 用 Supabase MCP 执行，依赖上一条批准）
-- [ ] 🚫 **受限 DB LOGIN 创建与授权**（见 §2.2.0-2）—— 建议排在上一条之后做，保持权限链干净
-- [ ] 🚫 **Games Vercel Production 项目创建**（见 §2.2.0-3）—— 与其余 🚫 项无依赖，可随时单独做
+- [x] ⬜ Production migration 实际执行（见 §2.2.1）—— 已完成 2026-08-16
+- [x] 🚫 **`rls_auto_enable()` EXECUTE 收权 migration 审批**（见 §2.2.0-1a）—— 已完成，2026-08-17 现场确认应用到 Production
+- [x] ⬜ `rls_auto_enable()` migration 实际执行（见 §2.2.1）—— 已完成，2026-08-21 `get_advisors` 复核确认无残留 PUBLIC EXECUTE 告警
+- [x] 🚫 **批准修复 P2P 建房故障的 migration 30**（见 §2.2.0-1b，2026-08-17 起草）—— 已完成，2026-08-21 `list_migrations` 确认 Production 30/30 与 Git 逐条匹配——**这是本次复核发现的最大变化**，上一版记录这一项"尚未应用"
+- [x] ⬜ migration 30 实际执行（见 §2.2.1）—— 已完成，随上一条一并确认
+- [ ] 🚫 **受限 DB LOGIN 创建与授权**（见 §2.2.0-2）—— migration 链路已全部走完，权限链干净，随时可以做；2026-08-21 复核仓库内无完成证据，仍按未完成处理
+- [ ] 🚫 **Games Vercel Production 项目创建**（见 §2.2.0-3）—— 与其余 🚫 项无依赖，可随时单独做；仓库内无 `.vercel`/`vercel.json`，无完成证据
 - [ ] ⬜ Games Vercel 环境变量配置（见 §2.2.1，AI 用 Vercel CLI/API 执行，依赖上一条项目创建）
-- [ ] 🚫 **`game.ningacademy.org` / `assets.ningacademy.org` DNS 记录**（见 §2.2.0-4）—— 与其余 🚫 项无依赖，可随时单独做
-- [ ] ⬜ R2 四 bucket 创建与 API token（见 §4.3，AI 用 Cloudflare API/`wrangler` 执行）
+- [ ] 🚫 **`game.ningacademy.org` / `assets.ningacademy.org` DNS 记录**（见 §2.2.0-4）—— 与其余 🚫 项无依赖，可随时单独做；DNS 状态无法从仓库内验证
+- [ ] ⬜ R2 四 bucket 创建与 API token（见 §4.3，AI 用 Cloudflare API/`wrangler` 执行）—— 2026-08-21 复核：仓库内无 `wrangler.toml`，确认尚未开始
 - [ ] ⬜ Cloudflare Worker 音频代理部署（见 §5.5，AI 用 `wrangler` 执行；生产自定义域路由依赖上面的 DNS 记录）
 - [ ] ⬜ TURN 服务器：V1 默认不购买，仅预留接口（`GAME_TURN_*`），后续按需接入（不阻塞发布）
 - [ ] ⚠️ Vercel Hobby → Pro 升级评估（若 NingAcademy 属于商业使用，生产发布前必须升级；AI 可评估并给出建议，实际下单付费需要用户用已有账号操作——这是产品/商务决策，不属于本文档 4 类 🚫 范围）
 - [ ] ⬜ Supabase 与 Vercel 用量/备份/商业条款按正式使用量在上线门禁复核
 - [ ] ⬜ R2 用量监控与配额告警设置（10GB-month 免费额度，默认关闭全量高频回放以保持在额度内）
+- [ ] ⬜ **新增**：清空 `scripts/p1/approved-pending-migrations.mjs` 里 migration 30 的豁免条目，恢复 Git-vs-Production 历史比对的完全一致模式（见 §2.2.0-1b）
+- [ ] ⬜ **新增**：针对当前 30/30 状态重新跑一次正式的 protected-audit CI（`p1-database-audit.yml` 的 `workflow_dispatch` production-read-only 分支），确认 IA-2-ACL 补丁在真实 CI 里也能清零 ACL diff（见 §2.2.4）
 
 ---
 
 ## 19. 跨阶段：文档、备份、监控清单
 
+- [x] 2026-08-21 本轮 gameplay 实施后，已同步更新 `docs/todo-v1-rev2.1.md` 与 `docs/project-status-rev2.1.md`，并明确区分基础架构/基础战斗与完整 gameplay
 - [ ] 每次完成一个 P 阶段后更新 `docs/project-status-rev2.1.md`
 - [ ] 每次完成一个 P 阶段后回来勾掉本文档对应条目
 - [ ] Production migration 执行记录归档（时间、执行人、结果、preflight 报告链接）
